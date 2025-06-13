@@ -880,7 +880,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!isInitialLoad && videoShowreelSection) {
             // On resizes (not the first load), store the current scroll and margin values BEFORE changing anything.
-            scrollTopBeforeResize = mainContentWrapper.scrollTop;
+            const scrollTopBeforeResize = mainContentWrapper.scrollTop;
             const styles = getComputedStyle(videoShowreelSection);
             videoMarginBeforeResize = (parseFloat(styles.marginTop) || 0) + (parseFloat(styles.marginBottom) || 0);
         }
