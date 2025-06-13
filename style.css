@@ -689,7 +689,7 @@ body, #main-content-wrapper {
     #films-image-1-module2,
     #films-image-1-module3,
     #films-image-1-module4 {
-        margin-left: 20rem !important; /* Center the film images */
+        margin-left: 30rem !important; /* Center the film images */
     }
 
     #filmsimage-3-module1,
@@ -917,7 +917,7 @@ body, #main-content-wrapper {
     #films-modules-container .films-section-wrapper {
         margin-top: 0rem !important; /* Space between individual film modules */
         margin-bottom: 100rem !important; /* Space below each film module */
-        /*width: 376rem !important; /* Override desktop width */
+        width: 376rem !important; /* Override desktop width */
     }
     
     #films-heading-1 { /* The main "FILMS" heading */

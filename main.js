@@ -22,11 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const MIN_FLING_VELOCITY_THRESHOLD = 0.00; // Velocity (pixels/ms) below which the fling animation stops.
 
     // --- Tunable Variable for Contact Heading Alignment ---
-    const CONTACT_HEADING_RAISE_REM = 4; 
+     
     let finalScrollTargetY = 0; // This will now be the single source of truth
-
-    let scrollTopBeforeResize = 0;
-    let videoMarginBeforeResize = 0;
     let isInitialLoad = true; // Flag to handle the first page load differently from resizes
 
     let canShowControlsOnInitialMove = false; // Flag to control initial showing via mousemove
@@ -721,7 +718,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Constants for Layout Logic ---
     const LAYOUT_MIN_VIDEO_TOP_MARGIN_REM = 0.5;
     const LAYOUT_MIN_VIDEO_BOTTOM_MARGIN_REM = 9.02; 
-    const LAYOUT_THRESHOLD_CASE1_MAX_REM = 235; // 227.4072rem is the threshold for Case 1
+    const LAYOUT_THRESHOLD_CASE1_MAX_REM = 227; // 227.4072rem is the threshold for Case 1
     const LAYOUT_THRESHOLD_CASE2_MAX_REM = 250;
 
     const LAYOUT_CASE2_EXCESS_BASE_REM = LAYOUT_THRESHOLD_CASE1_MAX_REM;
