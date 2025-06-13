@@ -676,7 +676,7 @@ body, #main-content-wrapper {
 
     .film-scroll-container {
         width: 100%;        /* Scroll container itself is full width */
-        padding-left: 0;    /* Images will be edge-to-edge within this */
+        padding-left: 10rem;    /* Images will be edge-to-edge within this */
         margin-top: 0rem !important; /* Adjust space below film titles */
         /* overflow-x: scroll; /* This should already be on the element */
         /* -webkit-overflow-scrolling: touch; /* For native-like momentum scroll on iOS */
