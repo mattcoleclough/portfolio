@@ -882,7 +882,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // On resizes (not the first load), store the current scroll and margin values BEFORE changing anything.
             const scrollTopBeforeResize = mainContentWrapper.scrollTop;
             const styles = getComputedStyle(videoShowreelSection);
-            videoMarginBeforeResize = (parseFloat(styles.marginTop) || 0) + (parseFloat(styles.marginBottom) || 0);
+            const videoMarginBeforeResize = (parseFloat(styles.marginTop) || 0) + (parseFloat(styles.marginBottom) || 0);
         }
 
         applyResponsiveFilmStripLayout();
