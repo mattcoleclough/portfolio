@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 500 500" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g>
+        <clipPath id="_clip1">
+            <path d="M250,500C388.071,500 500,388.072 500,250C500,111.929 388.071,0 250,0C111.928,0 0,111.929 0,250C0,388.072 111.928,500 250,500Z"/>
+        </clipPath>
+        <g clip-path="url(#_clip1)">
+            <rect x="-1" y="-1" width="502" height="502" style="fill-rule:nonzero;"/>
+        </g>
+        <clipPath id="_clip2">
+            <path d="M250,320C288.703,320 320.078,288.66 320.078,250C320.078,211.341 288.703,180 250,180C211.296,180 179.921,211.341 179.921,250C179.921,288.66 211.296,320 250,320Z"/>
+        </clipPath>
+        <g clip-path="url(#_clip2)">
+            <rect x="178.921" y="179" width="142.157" height="142" style="fill:white;fill-rule:nonzero;"/>
+        </g>
+        <clipPath id="_clip3">
+            <path d="M368.921,320C407.624,320 439,288.66 439,250C439,211.341 407.624,180 368.921,180C330.218,180 298.842,211.341 298.842,250C298.842,288.66 330.218,320 368.921,320Z"/>
+        </clipPath>
+        <g clip-path="url(#_clip3)">
+            <clipPath id="_clip4">
+                <rect x="309.152" y="180" width="129.848" height="141.444"/>
+            </clipPath>
+            <g clip-path="url(#_clip4)">
+                <rect x="308.152" y="179" width="131.848" height="142" style="fill:white;fill-rule:nonzero;"/>
+            </g>
+        </g>
+        <clipPath id="_clip5">
+            <path d="M131.078,320C169.782,320 201.157,288.66 201.157,250C201.157,211.341 169.782,180 131.078,180C92.375,180 61,211.341 61,250C61,288.66 92.375,320 131.078,320Z"/>
+        </clipPath>
+        <g clip-path="url(#_clip5)">
+            <clipPath id="_clip6">
+                <rect x="61" y="180" width="129.847" height="141.444"/>
+            </clipPath>
+            <g clip-path="url(#_clip6)">
+                <rect x="60" y="179" width="131.847" height="142" style="fill:white;fill-rule:nonzero;"/>
+            </g>
+        </g>
+        <clipPath id="_clip7">
+            <path d="M190.539,287.064C183.81,276.315 179.921,263.612 179.921,250C179.921,236.389 183.81,223.686 190.539,212.937C197.268,223.686 201.157,236.389 201.157,250C201.157,263.612 197.268,276.315 190.539,287.064Z"/>
+        </clipPath>
+        <g clip-path="url(#_clip7)">
+            <rect x="178.921" y="211.937" width="23.236" height="76.127" style="fill-rule:nonzero;"/>
+        </g>
+        <clipPath id="_clip8">
+            <path d="M309.46,212.937C316.189,223.686 320.078,236.389 320.078,250C320.078,263.612 316.189,276.315 309.46,287.064C302.731,276.315 298.842,263.612 298.842,250C298.842,236.389 302.731,223.686 309.46,212.937Z"/>
+        </clipPath>
+        <g clip-path="url(#_clip8)">
+            <rect x="297.842" y="211.937" width="23.236" height="76.127" style="fill-rule:nonzero;"/>
+        </g>
+    </g>
+</svg>

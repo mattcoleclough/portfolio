@@ -1,0 +1,1014 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+    font-family: 'Fluxisch Else';
+    src: url('ASSETS/Fonts/FluxischElse-Regular.woff') format('woff');
+    font-weight: normal; /* Set font-weight to 'light' as requested */
+    font-style: normal;
+    font-display: swap;
+}
+/* Light weight for Fluxisch Else */
+@font-face {
+    font-family: 'Fluxisch Else';
+    src: url('ASSETS/Fonts/FluxischElse-Light.woff') format('woff');
+    font-weight: light; /* Set font-weight to 'light' as requested */
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Fluxisch Else';
+    src: url('ASSETS/Fonts/FluxischElse-Bold.woff') format('woff');
+    font-weight: bold; /* Set font-weight to 'light' as requested */
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Set the base font size for the HTML element using vw for responsive scaling */
+/* Based on total width of 4356px (1rem = 10px at 4356px viewport width) */
+html {
+    font-size: 0.229568411vw;
+    /* Removed overflow-y: scroll and scrollbar hiding properties from html */
+}
+
+body {
+    font-family: 'Fluxisch Else','Univers', sans-serif; /* Fallback font */
+    background-color: #ffffff;
+    color: #232B33;
+    overflow: hidden; /* Prevent main browser scrollbars from appearing */
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE/Edge */
+    user-select: none; /* Standard */
+    /* cursor: default; /* Ensure cursor is default for all text */
+    margin: 0; /* Remove default body margin */
+    padding: 0; /* Remove default body padding */
+}
+
+/* New wrapper div to make content scrollable and hide its scrollbar */
+#main-content-wrapper {
+    height: 100vh; /* Make it fill the viewport height */
+    overflow-y: scroll; /* Make it vertically scrollable */
+    /* Custom CSS to hide scrollbar for a cleaner look */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+body, #main-content-wrapper {
+    cursor: default;
+}
+/* Webkit browsers (Chrome, Safari, Opera) scrollbar hiding for the wrapper */
+#main-content-wrapper::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari, Opera */
+}
+
+/* Hover effect for navigation headings - only applies when 'active-nav-link' class is present */
+.active-nav-link:hover {
+    color: cyan; /* Change text color to cyan on hover */
+}
+/* Hover effect for just the clickable 'touch' word */
+.contact-clickable-word {
+    transition: color 0.15s ease-in-out; /* Smooth transition for hover effect */
+}
+.contact-clickable-word:hover {
+    color: cyan; /* Change text color to cyan on hover */
+}
+
+/* Custom cursors for scrollable windows based on scroll progress */
+.film-scroll-container.active-cursor.cursor-scroll-right {
+    cursor: e-resize; /* Right arrow */
+}
+.film-scroll-container.active-cursor.cursor-scroll-left {
+    cursor: w-resize; /* Left arrow */
+}
+.film-scroll-container.active-cursor.cursor-scroll-bidirectional {
+    cursor: ew-resize; /* Bidirectional arrow */
+}
+.film-scroll-container.active-cursor.cursor-grabbing {
+    cursor: grabbing; /* Generic grabbing cursor for drag */
+}
+
+/* Video interaction cursors removed - overlay will use default cursor */
+#video-interaction-overlay {
+    cursor: default; /* Explicitly set default cursor for the overlay */
+}
+
+
+/* Make the background of scrollable containers white */
+.film-scroll-container {
+    background-color: #ffffff; /* Set background to white */
+    width: 307.5rem; 
+}
+
+/* Styles to hide scrollbars on .film-scroll-container elements */
+.film-scroll-container.hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+.film-scroll-container.hide-scrollbar::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari, Opera */
+}
+
+.scope-module .film-scroll-container img,
+.scope-module .film-scroll-container > div:not(.film-strip-spacer):not(:empty) { /* Target text blocks and images, but not spacers */
+    height: 71.3rem; /* Calculated for 2.39:1 aspect ratio based on 170.4rem width */
+}
+
+/* New Fade Overlay Styles */
+#fade-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: white;
+    z-index: 100; /* Ensure it's on top of everything */
+    opacity: 1; /* Start fully opaque */
+    transition: opacity 2.5s ease-out; /* Fade out over 2.5 seconds */
+    pointer-events: auto; /* Start by blocking interaction */
+}
+
+/* Social Icon Link Styling */
+
+
+.social-icon-link {
+    cursor: default; /* Keep cursor as default, not pointer */
+    display: inline-block; /* Ensures box-shadow and transform work well */
+    transform: scale(1);
+} 
+
+.social-icon-link:hover img {
+    transform: scale(1.05); /* Slight zoom effect on hover */
+    transition: transform 0.2s ease-in-out; /* Smooth transition for zoom effect */
+} 
+
+/* Social Icon Styling - Fade-to-Color Method */
+
+/* Common container for each social icon */
+.social-icon {
+    width: 12.5rem;
+    height: 12.5rem;
+    position: relative; /* Needed to position the pseudo-element */
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: default; /* Use pointer since it's a link */
+    transition: transform 0.2s ease-in-out; /* Add transition for the hover scale */
+}
+
+/* The ::before pseudo-element holds the MONOCHROME version on top */
+.social-icon::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 1; /* Visible by default */
+    transition: opacity 0.3s ease-in-out; /* This creates the fade effect */
+}
+
+/* On hover of the main div, fade out the monochrome version */
+.social-icon:hover::before {
+    opacity: 0;
+}
+
+/* Optional: Add a slight zoom effect on the container itself on hover */
+.social-icon:hover {
+    transform: scale(1.05);
+}
+
+/* --- Assigning the images to each icon --- */
+
+/* Icon 1: Vimeo */
+#social-icon-1 { background-image: url('ASSETS/Social-Icons/Vimeo/vimeo.svg'); } /* Color version */
+#social-icon-1::before { background-image: url('ASSETS/Social-Icons/Vimeo/vimeo-mono-grey.png'); } /* Mono version */
+
+/* Icon 2: Instagram */
+#social-icon-2 { background-image: url('ASSETS/Social-Icons/Instagram/Instagram.svg'); } /* Color version */
+#social-icon-2::before { background-image: url('ASSETS/Social-Icons/Instagram/Instagram-mono.svg'); } /* Mono version */
+
+/* Icon 3: Letterboxd */
+#social-icon-3 { background-image: url('ASSETS/Social-Icons/Letterboxd/letterboxd.svg'); } /* Color version */
+#social-icon-3::before { background-image: url('ASSETS/Social-Icons/Letterboxd/letterboxd-mono.svg'); } /* Mono version */
+
+/* Icon 4: Substack */
+#social-icon-4 { background-image: url('ASSETS/Social-Icons/Substack/substack.svg'); } /* Color version */
+#social-icon-4::before { background-image: url('ASSETS/Social-Icons/Substack/substack-mono.svg'); } /* Mono version */
+
+/* Common style for the button container itself (already in your canvas) */
+.custom-video-control-button {
+    position: absolute;
+    width: auto; 
+    height: auto;
+    padding: 0.5rem; 
+    background: none; 
+    border: none; 
+    border-radius: 0; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;   
+    z-index: 20; 
+    opacity: 0; /* Hidden by default, made visible by JS with .visible-control */
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out, transform 0.2s ease-in-out; /* Only opacity and transform for the button itself */
+    transform: scale(1); 
+}
+
+.custom-video-control-button.visible-control {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Common style for the .icon-shape div that displays the SVG mask */
+.custom-video-control-button .icon-shape {
+    width: 9rem;  /* Visual size of the icon */
+    height: 9rem; /* Visual size of the icon */
+    background-color: #e7e7e7; /* Default color: Light Grey for the (outline) SVG mask */
+    /* Transition for background-color (for icon color change) and mask-image (for swapping SVGs) */
+    /* No transition for mask-image swap to make it instant on hover */
+    transition: background-color 0.2s ease-in-out; 
+
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+}
+
+/* --- Play/Pause Button --- */
+#custom-play-pause-button {
+    bottom: 3rem; 
+    left: 3rem;  
+}
+
+/* Default state for Play (when video is PAUSED, button shows PLAY icon) */
+#custom-play-pause-button.display-play-svg .icon-shape {
+    -webkit-mask-image: url(assets/VideoControls/play.svg);
+    mask-image: url(assets/VideoControls/play.svg);
+}
+/* Hover state for Play (ACTION: Play the video) */
+#custom-play-pause-button.display-play-svg:hover .icon-shape {
+    -webkit-mask-image: url(assets/VideoControls/play-hover.svg); /* Use FILLED play icon */
+    mask-image: url(assets/VideoControls/play-hover.svg);
+    background-color: cyan;
+}
+#custom-play-pause-button:hover { /* For the button container itself */
+    transform: scale(1);
+}
+
+/* Default state for Pause (when video is PLAYING, button shows PAUSE icon) */
+#custom-play-pause-button.display-pause-svg .icon-shape {
+    -webkit-mask-image: url(assets/VideoControls/pause.svg);
+    mask-image: url(assets/VideoControls/pause.svg);
+}
+/* Hover state for Pause (ACTION: Pause the video) */
+#custom-play-pause-button.display-pause-svg:hover .icon-shape {
+    -webkit-mask-image: url(assets/VideoControls/pause-hover.svg); /* Use FILLED pause icon */
+    mask-image: url(assets/VideoControls/pause-hover.svg);
+    background-color: cyan;
+}
+
+
+/* --- Mute/Unmute Button --- */
+#custom-mute-unmute-button {
+    bottom: 3rem;   
+    right: 15rem;  
+}
+
+/* Default state for Mute (when video is UNMUTED, button shows MUTE icon) */
+#custom-mute-unmute-button.display-mute-svg .icon-shape {
+    -webkit-mask-image: url(assets/VideoControls/mute.svg);
+    mask-image: url(assets/VideoControls/mute.svg);
+}
+/* Hover state for Mute (ACTION: Mute the video) */
+#custom-mute-unmute-button.display-mute-svg:hover .icon-shape {
+    -webkit-mask-image: url(assets/VideoControls/mute-hover.svg); /* Use FILLED mute icon */
+    mask-image: url(assets/VideoControls/mute-hover.svg);
+    background-color: cyan;
+}
+#custom-mute-unmute-button:hover { /* For the button container itself */
+    transform: scale(1);
+}
+
+/* Default state for Unmute (when video is MUTED, button shows UNMUTE icon) */
+#custom-mute-unmute-button.display-unmute-svg .icon-shape {
+    -webkit-mask-image: url(assets/VideoControls/unmute.svg);
+    mask-image: url(assets/VideoControls/unmute.svg);
+}
+/* Hover state for Unmute (ACTION: Unmute the video) */
+#custom-mute-unmute-button.display-unmute-svg:hover .icon-shape {
+    -webkit-mask-image: url(assets/VideoControls/unmute-hover.svg); /* Use FILLED unmute icon */
+    mask-image: url(assets/VideoControls/unmute-hover.svg);
+    background-color: cyan;
+}
+
+
+/* --- Fullscreen Button --- */
+#custom-fullscreen-button {
+    bottom: 3rem;   
+    right: 3rem;  
+}
+
+/* Default state for Fullscreen (when NOT IN FULLSCREEN, button shows ENTER FULLSCREEN icon) */
+#custom-fullscreen-button.display-fullscreen-svg .icon-shape {
+    -webkit-mask-image: url(assets/VideoControls/fullscreen.svg);
+    mask-image: url(assets/VideoControls/fullscreen.svg);
+}
+/* Hover state for Fullscreen (ACTION: Enter Fullscreen) */
+#custom-fullscreen-button.display-fullscreen-svg:hover .icon-shape {
+    -webkit-mask-image: url(assets/VideoControls/fullscreen-hover.svg); /* Use FILLED fullscreen icon */
+    mask-image: url(assets/VideoControls/fullscreen-hover.svg);
+    background-color: cyan;
+}
+#custom-fullscreen-button:hover { /* For the button container itself */
+    transform: scale(1);
+}
+
+/* Default state for Exit Fullscreen (when IN FULLSCREEN, button shows EXIT FULLSCREEN icon) */
+#custom-fullscreen-button.display-exit-fullscreen-svg .icon-shape {
+    -webkit-mask-image: url(assets/VideoControls/exit-fullscreen.svg);
+    mask-image: url(assets/VideoControls/exit-fullscreen.svg);
+}
+/* Hover state for Exit Fullscreen (ACTION: Exit Fullscreen) */
+#custom-fullscreen-button.display-exit-fullscreen-svg:hover .icon-shape {
+    -webkit-mask-image: url(assets/VideoControls/exit-fullscreen-hover.svg); /* Use FILLED exit-fullscreen icon */
+    mask-image: url(assets/VideoControls/exit-fullscreen-hover.svg);
+    background-color: cyan;
+}
+
+/* Classes to apply SVG masks */
+#custom-fullscreen-button.display-fullscreen-svg .icon-shape {
+    -webkit-mask-image: url(assets/VideoControls/fullscreen.svg);
+    mask-image: url(assets/VideoControls/fullscreen.svg);
+}
+
+#custom-fullscreen-button.display-exit-fullscreen-svg .icon-shape {
+    -webkit-mask-image: url(assets/VideoControls/exit-fullscreen.svg);
+    mask-image: url(assets/VideoControls/exit-fullscreen.svg);
+}
+
+#social-icons-container {
+    margin-top: 13.5rem; /* Creates space below the text block. Adjust as needed. */
+    width: 100%; /* Ensure it takes the full width of its parent */
+    justify-content: flex-start; /* Aligns icons to the left. Use 'center' to center them. */
+}
+
+    #contact-section {
+    margin-top: 30rem; /* Maintain vertical spacing */
+    margin-left: 0; /* Align with the main content */
+    text-align: left;
+}
+
+#contact-layout-wrapper {
+    display: flex;
+    flex-direction: row; /* Arrange items in a row */
+    align-items: flex-start; /* Align items to the top */
+    gap: 9rem; /* Space between the text column and the image */
+}
+
+#contact-text-column {
+    margin-top: 8rem;
+    display: flex; 
+    flex-direction: row; /* Stack heading and text vertically */
+    justify-content: flex-start;
+    flex-shrink: 0; /* Prevent this column from shrinking */
+    gap: 30rem;
+}
+
+#contact-heading {
+    margin-top: 4.5rem;
+    font-size: 16rem;
+    font-family: 'Fluxisch Else', 'Univers', sans-serif;
+    justify-content: flex-start;
+}
+
+#contact-image {
+    margin-top: 0rem; /* Align top of image with top of body text */
+    margin-left: 0rem; /* Align left edge of image with left edge of text */
+}
+
+
+/* --- Fullscreen Mode Styles --- */
+#video-placeholder-div:-webkit-full-screen { /* Safari, Chrome, Opera */
+    width: 100% !important;
+    height: 100% !important;
+    /* background-color: black; /* Optional: ensures no gaps */
+}
+#video-placeholder-div:-moz-full-screen { /* Firefox */
+    width: 100% !important;
+    height: 100% !important;
+    /* background-color: black; */
+}
+#video-placeholder-div:-ms-fullscreen { /* IE/Edge */
+    width: 100% !important;
+    height: 100% !important;
+    /* background-color: black; */
+}
+#video-placeholder-div:fullscreen { /* Standard */
+    width: 100% !important;
+    height: 100% !important;
+    /* background-color: black; */
+}
+
+/* Make iframe fill the fullscreen container */
+#video-placeholder-div:-webkit-full-screen #vimeo-player-iframe,
+#video-placeholder-div:-moz-full-screen #vimeo-player-iframe,
+#video-placeholder-div:-ms-fullscreen #vimeo-player-iframe,
+#video-placeholder-div:fullscreen #vimeo-player-iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* Ensure overlay also covers the fullscreen container */
+#video-placeholder-div:-webkit-full-screen #video-interaction-overlay,
+#video-placeholder-div:-moz-full-screen #video-interaction-overlay,
+#video-placeholder-div:-ms-fullscreen #video-interaction-overlay,
+#video-placeholder-div:fullscreen #video-interaction-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10; /* Should be above iframe, below buttons */
+}
+
+/* Scrollable Module Shadow Overlays */
+
+/* The container needs to be a positioning context for the shadows */
+.scroll-shadow-wrapper {
+    position: relative;
+}
+
+.scroll-shadow-wrapper::before,
+.scroll-shadow-wrapper::after {
+    content: '';
+    position: absolute; /* Positioned relative to the wrapper */
+    top: 0;
+    bottom: 0;
+    z-index: 2; 
+    pointer-events: none; 
+    opacity: 0; 
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Left shadow styles */
+.scroll-shadow-wrapper::before {
+    left: 0;
+    width: 8rem; 
+    background: linear-gradient(to right, #80808080, #80808000);
+    display: none;
+}
+
+/* Right shadow styles */
+.scroll-shadow-wrapper::after {
+    right: 0;
+    width: 8rem;
+    background: linear-gradient(to left, #80808080, #80808000);
+    display: none;
+}
+
+/* Classes to control visibility, applied to the WRAPPER */
+.scroll-shadow-wrapper.show-left-shadow::before,
+.scroll-shadow-wrapper.show-right-shadow::after {
+    opacity: 1;
+}
+
+@media (max-width: 600px) and (orientation: portrait) {
+    .scroll-shadow-wrapper::before {
+        width: 5rem;
+        display: hidden; /* Show left shadow on phone portrait */
+    }
+    .scroll-shadow-wrapper::after {
+        width: 5rem;
+        display: hidden;
+    }
+        /* You might not need the desktop-specific left offset anymore if the wrapper handles it */
+}
+
+/* =============================================== */
+/* --- Phone Portrait Styles (Max-width: 600px) --- */
+/* =============================================== */
+
+@media (max-width: 600px) and (orientation: portrait) {
+
+    /* -------------------------------------------------- */
+    /* 1. Global Adjustments for Phone Portrait           */
+    /* -------------------------------------------------- */
+
+    body {
+        /* If you need any specific body changes for phone portrait */
+        -webkit-text-size-adjust: 221%;
+    }
+
+    #initial-buffer {
+        size: 0rem;
+    }
+
+    .container { /* Your main content container class from Tailwind */
+        padding-left: 0rem !important;  /* Reduce side padding; use !important if Tailwind utilities are too strong */
+        padding-right: 0rem !important;
+        max-width: 100% !important; /* Ensure it doesn't exceed screen */
+    }
+
+    #video-showreel-section {
+        margin-top: 75rem !important; /* Adjust top margin for phone portrait */
+        margin-bottom: 90rem !important;
+        margin-left: 0rem !important; /* Center the video section */
+        margin-right: 0rem !important; /* Center the video section */
+        height: auto;
+    }
+
+    /* Common adjustments for all video control buttons */
+    #custom-play-pause-button,
+    #custom-mute-unmute-button,
+    #custom-fullscreen-button {
+        padding: 3rem !important; /* Slightly reduce padding if 0.5rem (6px) feels okay, or make it larger for easier tapping */
+                                    /* e.g., padding: 0.75rem !important; /* (9px tap padding) */
+        /* Transition for transform might already be on the base style, if not, add it for hover scale */
+        transition: opacity 0.3s ease-in-out, transform 0.2s ease-in-out, background-color 0.2s ease-in-out; /* Added background-color for icon-shape hover */
+        width: auto !important;   /* Was 9rem, now 4.5rem (54px). Adjust. */
+        height: auto !important;
+    }
+
+    /* 1. Play/Pause Button (Text-based icon) */
+    #custom-play-pause-button {
+        left: 9rem !important;      /* Was 3rem (36px), now 1rem (12px) from edge. */
+        bottom: 9rem !important;    /* Was 0rem, or 1.5rem in some examples. Adjust. */
+        /* padding: 0.5rem !important; /* Keep or adjust padding if font size change affects it */
+    }
+
+    /* 2. Mute/Unmute Button (SVG icon via .icon-shape) */
+    #custom-mute-unmute-button {
+        right: 45rem !important;     /* Was 3rem, now 1rem from edge. */
+        bottom: 9rem !important;   /* Was 0rem. Adjust. */
+        /* Padding is on the button itself for tap area */
+    }
+    #custom-play-pause-button .icon-shape,
+    #custom-mute-unmute-button .icon-shape,
+    #custom-fullscreen-button .icon-shape {
+        width: 27rem !important;   /* Was 9rem, now 4.5rem (54px). Adjust. */
+        height: 27rem !important;
+        /* background-color will still be #e7e7e7 by default, cyan on button hover */
+    }
+
+    /* 3. Fullscreen/Exit Fullscreen Button (SVG icon via .icon-shape) */
+    #custom-fullscreen-button {
+        bottom: 9rem !important;       /* Was 0rem. Adjust. */
+        right: 9rem !important;     /* Was 3rem, now 1rem from edge. */
+        /* Padding is on the button itself for tap area */
+    }
+
+    #main-layout-container {
+        display: flex; /* Ensure display flex is still active if not inherited */
+        flex-direction: column !important; /* Stack children vertically */
+        align-items: left;
+    }
+
+    #main-layout-container > .flex-shrink-0,  /* This targets the ABOUT block wrapper */
+    #main-layout-container > #films-modules-container {
+        width: 100% !important; /* Or your desired width within parent padding */
+        max-width: 100% !important; /* Ensure it doesn't overflow its new column context */
+        margin-left: 0rem !important;  /* Reset desktop margins */
+        margin-right: 0rem !important;
+        margin-bottom: 18rem; /* Add some space between stacked sections */
+    }
+
+    #films-modules-container {
+        width: 100% !important; /* Override inline style if necessary */
+        /* position: static !important; /* If its 'position: relative' causes issues in column flow */
+    }
+    
+    #about-heading {
+        display: none;
+        margin-left: 30rem !important;
+    }
+
+    #about-content-flex-wrapper { /* The new wrapper for image and text */
+        display: flex;
+        flex-direction: column-reverse;    /* Image left, text right */
+        align-items: flex-start;
+        gap: 20rem;             /* Space between image and text */
+        margin-left: 30rem !important;
+        margin-top: 40rem !important; /* Space above the about section */
+        margin-right: 33rem !important; /* Center the content */
+    }
+
+    #about-image-container {
+        flex: 0 0 45.18%;          /* Image container takes ~35% width */
+                                /* Consider a max-width too: max-width: 120px; */
+        margin-top: 0 !important; /* Reset Tailwind margin if needed */
+    }
+    #about-me-image {
+        width: 100%;
+        height: auto;
+        display: none;
+    }
+
+    #about-text-container {
+        flex: 1;                /* Text takes remaining space */
+        margin-top: 0 !important; /* Reset Tailwind margin */
+        margin-bottom: 20rem !important; /* Space below text */
+        width: auto !important;   /* Override desktop fixed width */
+        font-size: 22.5rem !important; /* Example: Smaller text */
+        line-height: 1.5 !important;
+    }
+
+    p.mb-\[4\.5rem\] {
+        margin-bottom: 10rem !important;
+    }
+    /* Ensure paragraphs within about-text-container have appropriate styling */
+    #about-text-container p {
+        font-weight: light !important; /* If this was set inline before */
+    }
+
+
+    #social-icons-container {
+        position: static !important; 
+        margin-top: 20rem !important;
+        margin-bottom: 50rem !important;
+        width: auto !important; /* Let content decide or set specific width */
+        height: auto !important;
+        left: auto !important;
+        top: auto !important;
+        right: auto !important;
+        display: block; /* For centering margin: auto to work if not flex */
+        margin-left: auto;
+        margin-right: auto;
+    }
+    #social-icons-container {
+        display: flex; /* Keep it flex for the icons themselves */
+        justify-content: left;
+        gap: 15rem !important; /* Adjust gap for phone */
+    }
+    #social-icons-container .social-icon {
+        width: 27.8rem !important;  /* Smaller social icons */
+        height: 27.8rem !important;
+    }
+
+    #films-modules-container {
+        margin-left: 0rem !important; /* Override any desktop specific margin */
+        margin-top: 0rem !important; /* Space above films section */
+        margin-right: 0 !important; /* Reset right margin */
+    }
+
+    #films-modules-container .films-section-wrapper {
+        margin-top: 0rem !important; /* Space between individual film modules */
+        margin-bottom: 100rem !important; /* Space below each film module */
+        width: 376rem !important; /* Override desktop width */
+    }
+    
+    #films-heading-1 { /* The main "FILMS" heading */
+        /*font-size: 36rem !important; /* Example: Smaller heading */
+        padding-left: 20rem !important; /* Adjust padding if needed */
+        display: none;
+    }
+
+    .film-scroll-container {
+        width: 100%;        /* Scroll container itself is full width */
+        padding-left: 0;    /* Images will be edge-to-edge within this */
+        margin-top: 0rem !important; /* Adjust space below film titles */
+        /* overflow-x: scroll; /* This should already be on the element */
+        /* -webkit-overflow-scrolling: touch; /* For native-like momentum scroll on iOS */
+    }
+    .scroll-shadow-wrapper {
+        margin-bottom: 60rem !important; /* Space between film strips */
+    }
+
+    #films-image-1,
+    #films-image-1-module2,
+    #films-image-1-module3,
+    #films-image-1-module4 {
+        margin-left: 20rem !important; /* Center the film images */
+    }
+
+    #filmsimage-3-module1,
+    #filmsimage-3-module2,
+    #filmsimage-3-module3,
+    #filmsimage-3-module4 {
+        margin-right: 10rem !important; /* Center the film images */
+    }
+
+
+    /* -------------------------------------------------- */
+    /* 5. Contact Section Layout for Phone Portrait       */
+    /* -------------------------------------------------- */
+    
+    /* Override JS absolute positioning for these elements in phone portrait */
+    #contact-section {
+        flex-direction: row !important;
+        margin-left: 30rem !important; /* Center contact section */
+        margin-top: 30rem !important; /* Space above contact section */
+    }
+
+    #contact-content-wrapper {
+        flex-direction: row !important;
+
+        /*gap: 17.56rem;*/
+    }
+    #contact-heading {
+        margin-bottom: 0 !important; /* Reset bottom margin */
+        display: none;
+    }
+
+    #contact-text-column {
+        flex-direction: column !important; /* Stack heading and text vertically */
+        gap: 10rem !important; /* Space between heading and text */
+    }
+
+    #contact-text-content {
+        width: 173.88rem !important; 
+        text-align: left;
+        line-height: 1.4 !important;
+        margin-left: 0 !important; /* Reset left margin */
+        margin-top: 25rem !important; /* Reset top margin */
+    }
+    #contact-image {
+        margin-top: 0rem !important; /* Adjust top margin for image */
+        margin-right: 30rem !important; /* Adjust right margin for image */
+        width: 212.48rem !important;
+        height: auto !important;
+    }
+    #copyright-text {
+        margin-top: 20rem !important; /* Space below contact section */
+        margin-bottom: 30rem !important; /* Smaller copyright text */
+        text-size-adjust: 100%;
+    }
+}
+    /* --- END OF Phone Portrait Media Query --- */
+
+/* --- Mixed Touch Styles --- */
+
+    @media (orientation: portrait) and (min-width: 601px) and (max-width: 991px),
+            (orientation: landscape) and (max-height: 500px) {
+
+
+    /* -------------------------------------------------- */
+    /* 1. Global Adjustments for Mixed Touch          */
+    /* -------------------------------------------------- */
+
+    body {
+        /* If you need any specific body changes for Mixed Touch */
+        -webkit-text-size-adjust: 120%;
+    }
+
+    #initial-buffer {
+        size: 0rem;
+    }
+
+    .container { /* Your main content container class from Tailwind */
+        padding-left: 0rem !important;  /* Reduce side padding; use !important if Tailwind utilities are too strong */
+        padding-right: 0rem !important;
+        max-width: 100% !important; /* Ensure it doesn't exceed screen */
+    }
+
+    #video-showreel-section {
+        margin-top: 0rem !important; /* Adjust top margin for phone portrait */
+        margin-bottom: 30rem !important;
+        margin-left: 30rem !important; /* Center the video section */
+        margin-right: 30rem !important; /* Center the video section */
+        height: auto;
+    }
+
+    /* Common adjustments for all video control buttons */
+    #custom-play-pause-button,
+    #custom-mute-unmute-button,
+    #custom-fullscreen-button {
+        padding: 3rem !important; /* Slightly reduce padding if 0.5rem (6px) feels okay, or make it larger for easier tapping */
+                                    /* e.g., padding: 0.75rem !important; /* (9px tap padding) */
+        /* Transition for transform might already be on the base style, if not, add it for hover scale */
+        transition: opacity 0.3s ease-in-out, transform 0.2s ease-in-out, background-color 0.2s ease-in-out; /* Added background-color for icon-shape hover */
+        width: auto !important;   /* Was 9rem, now 4.5rem (54px). Adjust. */
+        height: auto !important;
+    }
+
+    /* 1. Play/Pause Button (Text-based icon) */
+    #custom-play-pause-button {
+        left: 6rem !important;      /* Was 3rem (36px), now 1rem (12px) from edge. */
+        bottom: 6rem !important;    /* Was 0rem, or 1.5rem in some examples. Adjust. */
+        padding: 1rem !important; /* Keep or adjust padding if font size change affects it */
+    }
+
+    /* 2. Mute/Unmute Button (SVG icon via .icon-shape) */
+    #custom-mute-unmute-button {
+        right: 30rem !important;     /* Was 3rem, now 1rem from edge. */
+        bottom: 6rem !important;
+        padding: 1rem !important;  /* Was 0rem. Adjust. */
+        /* Padding is on the button itself for tap area */
+    }
+    #custom-play-pause-button .icon-shape,
+    #custom-mute-unmute-button .icon-shape,
+    #custom-fullscreen-button .icon-shape {
+        width: 18rem !important;   /* Was 9rem, now 4.5rem (54px). Adjust. */
+        height: 18rem !important;
+        /* background-color will still be #e7e7e7 by default, cyan on button hover */
+    }
+
+    /* 3. Fullscreen/Exit Fullscreen Button (SVG icon via .icon-shape) */
+    #custom-fullscreen-button {
+        bottom: 6rem !important;       /* Was 0rem. Adjust. */
+        right: 6rem !important;
+        padding: 1rem !important;     /* Was 3rem, now 1rem from edge. */
+        /* Padding is on the button itself for tap area */
+    }
+
+    #main-layout-container {
+        display: flex; /* Ensure display flex is still active if not inherited */
+        flex-direction: column !important; /* Stack children vertically */
+        align-items: left;
+    }
+
+    #main-layout-container > .flex-shrink-0,  /* This targets the ABOUT block wrapper */
+    #main-layout-container > #films-modules-container {
+        width: 100% !important; /* Or your desired width within parent padding */
+        max-width: 100% !important; /* Ensure it doesn't overflow its new column context */
+        margin-left: 0rem !important;  /* Reset desktop margins */
+        margin-right: 0rem !important;
+        margin-bottom: 18rem; /* Add some space between stacked sections */
+    }
+
+    #films-modules-container {
+        width: 100% !important; /* Override inline style if necessary */
+        /* position: static !important; /* If its 'position: relative' causes issues in column flow */
+    }
+    
+    #about-heading {
+        display: none;
+        margin-left: 45rem !important;
+    }
+
+    #about-content-flex-wrapper { /* The new wrapper for image and text */
+        display: flex;
+        flex-direction: row-reverse;    /* Image left, text right */
+        align-items: flex-start;
+        gap: 20rem;             /* Space between image and text */
+        margin-left: 45rem !important;
+        margin-top: 0rem !important; /* Space above the about section */
+        margin-right: 30rem !important; /* Center the content */
+    }
+
+    #about-image-container {
+        flex: 0 0 32%;          /* Image container takes ~35% width */
+                                /* Consider a max-width too: max-width: 120px; */
+        margin-top: 0 !important; /* Reset Tailwind margin if needed */
+    }
+    #about-me-image {
+        width: 100%;
+        height: auto;
+    }
+
+    #about-text-container {
+        flex: 1;                /* Text takes remaining space */
+        margin-top: 0 !important; /* Reset Tailwind margin */
+        margin-bottom: 20rem !important; /* Space below text */
+        width: auto !important;   /* Override desktop fixed width */
+        -webkit-text-size-adjust: 130% !important;
+        line-height: 1.5 !important;
+    }
+
+    p.mb-\[4\.5rem\] {
+        margin-bottom: 10rem !important;
+    }
+    /* Ensure paragraphs within about-text-container have appropriate styling */
+    #about-text-container p {
+        font-weight: light !important; /* If this was set inline before */
+    }
+
+
+    #social-icons-container {
+        position: static !important; 
+        margin-top: 20rem !important;
+        margin-bottom: 10rem !important;
+        width: auto !important; /* Let content decide or set specific width */
+        height: auto !important;
+        left: auto !important;
+        top: auto !important;
+        right: auto !important;
+        display: block; /* For centering margin: auto to work if not flex */
+        margin-left: auto;
+        margin-right: auto;
+    }
+    #social-icons-container {
+        display: flex; /* Keep it flex for the icons themselves */
+        justify-content: left;
+        gap: 10rem !important; /* Adjust gap for phone */
+    }
+    #social-icons-container .social-icon {
+        width: 15rem !important;  /* Smaller social icons */
+        height: 15rem !important;
+    }
+
+    #films-modules-container {
+        margin-left: 15rem !important; /* Override any desktop specific margin */
+        margin-top: 0rem !important; /* Space above films section */
+        margin-right: 0 !important; /* Reset right margin */
+    }
+
+    #films-modules-container .films-section-wrapper {
+        margin-top: 0rem !important; /* Space between individual film modules */
+        margin-bottom: 100rem !important; /* Space below each film module */
+        /*width: 376rem !important; /* Override desktop width */
+    }
+    
+    #films-heading-1 { /* The main "FILMS" heading */
+        /*font-size: 36rem !important; /* Example: Smaller heading */
+        padding-left: 45rem !important; /* Adjust padding if needed */
+        display: none;
+        margin-top: 0rem !important; /* Reset top margin */
+        margin-bottom: 0rem !important; /* Space below films heading */
+    }
+
+    .film-scroll-container {
+        width: 100%;        /* Scroll container itself is full width */
+        padding-left: 0;    /* Images will be edge-to-edge within this */
+        margin-top: 0rem !important; /* Adjust space below film titles */
+        /* overflow-x: scroll; /* This should already be on the element */
+        /* -webkit-overflow-scrolling: touch; /* For native-like momentum scroll on iOS */
+    }
+    .scroll-shadow-wrapper {
+        margin-bottom: 15rem !important; /* Space between film strips */
+    }
+    .scroll-shadow-wrapper::before {
+        width: 50rem;
+        display: hidden; /* Show left shadow on phone portrait */
+    }
+    .scroll-shadow-wrapper::after {
+        width: 5rem !important;
+        display: hidden;
+    }
+
+    #films-image-1,
+    #films-image-1-module2,
+    #films-image-1-module3,
+    #films-image-1-module4 {
+        margin-left: 35rem !important; /* Center the film images */
+    }
+
+    #filmsimage-3-module1,
+    #filmsimage-3-module2,
+    #filmsimage-3-module3,
+    #filmsimage-3-module4 {
+        margin-right: 12rem !important; /* Center the film images */
+    }
+    #castCrew1,
+    #castCrew2,
+    #castCrew3,
+    #castCrew4 {
+        margin-left: 48rem !important; /* Center the film images */
+        margin-right: 12rem !important; /* Center the film images */
+    }
+
+
+    /* -------------------------------------------------- */
+    /* 5. Contact Section Layout for Mixed Touch       */
+    /* -------------------------------------------------- */
+    
+    /* Override JS absolute positioning for these elements in Mixed Touch */
+    #contact-section {
+        flex-direction: row !important;
+        margin-left: 45rem !important; /* Center contact section */
+        margin-top: 0rem !important; /* Space above contact section */
+    }
+
+    #contact-content-wrapper {
+        flex-direction: row !important;
+    }
+    #contact-heading {
+        margin-bottom: 0 !important; /* Reset bottom margin */
+        display: none;
+    }
+
+    #contact-text-column {
+        flex-direction: column !important; /* Stack heading and text vertically */
+        gap: 10rem !important; /* Space between heading and text */
+    }
+
+    #contact-text-content {
+        width: 155.23rem !important; 
+        text-align: left;
+        font-size: 9rem !important; /* Example: Smaller text */
+        line-height: 1.4 !important;
+        margin-left: 0rem !important; /* Reset left margin */
+        margin-top: 40rem !important; /* Reset top margin */
+    }
+    #contact-image {
+        margin-top: 5rem !important; /* Adjust top margin for image */
+        margin-right: 30rem !important; /* Adjust right margin for image */
+        width: 189.69rem !important;
+        height: auto !important;
+    }
+    #copyright-text {
+        margin-top: 20rem !important; /* Space below contact section */
+        margin-bottom: 10rem !important; /* Smaller copyright text */
+    }
+}
