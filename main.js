@@ -631,85 +631,64 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // NEW: Function to handle responsive sizing within film modules
-    function applyResponsiveFilmStripLayout() {
+        // NEW: Function to handle responsive sizing within film modules
+        function applyResponsiveFilmStripLayout() {
         const isMobile = (currentLayoutMode === 'phone_portrait_touch');
         const isMixedTouch = (currentLayoutMode === 'mixed_touch');
         const remToPxRatio = parseFloat(getComputedStyle(document.documentElement).fontSize);
 
-        // Define content sizes in rem as per your requirements
-        const mobileImageWidthRem = 376;
-        const mobileTextBlockWidthRem = 203.24;
-        const mobileGapRem = 30;
-        const mobileFourthModuleImageHeightRem = 160; // Height for the fourth module image
+        // ... (your rem to px calculations are correct)
 
-            // Define content sizes in rem as per your requirements
-        const mixedTouchImageWidthRem = 214.6;
-        const mixedTouchTextBlockWidthRem = 116;
-        const mixedTouchGapLeftRem = 30;
-        const mixedTouchGapRightRem = 30;
-
-        // Convert to pixels for setting styles
-        const mobileImageWidthPx = mobileImageWidthRem * remToPxRatio;
-        const mobileTextBlockWidthPx = mobileTextBlockWidthRem * remToPxRatio;
-        const mobileGapPx = mobileGapRem * remToPxRatio;
-
-        // Convert to pixels for setting styles
-        const mixedTouchImageWidthPx = mixedTouchImageWidthRem * remToPxRatio;
-        const mixedTouchTextBlockWidthPx = mixedTouchTextBlockWidthRem * remToPxRatio;
-        const mixedTouchGapLeftPx = mixedTouchGapLeftRem * remToPxRatio;
-        const mixedTouchGapRightPx = mixedTouchGapRightRem * remToPxRatio;
-        
         document.querySelectorAll('.film-scroll-container').forEach(container => {
-            // Get all direct children that are images or text blocks
-            //if (isMobile || isMixedTouch) {
-                // Calculate the available width from the container's left edge to the viewport's right edge
+            // --- FIX #1: Only apply dynamic width on touch modes ---
+            if (isMobile || isMixedTouch) {
                 const containerRect = container.getBoundingClientRect();
                 const containerLeft = containerRect.left;
                 const newWidth = window.innerWidth - containerLeft;
-                
-                // Set the container's width dynamically to fill the space
                 container.style.width = newWidth + 'px';
-            //} else {
-                // On desktop, remove the inline style to revert to the CSS-defined width (e.g., 307.5rem)
-                //container.style.width = ''; 
-            //}
+            } else {
+                // On desktop, revert to CSS-defined width
+                container.style.width = ''; 
+            }
 
-            const contentElements = container.querySelectorAll('img, div:not(.film-strip-spacer):not([style*="width: 1px"])');
+            // --- FIX #2: Select '<picture>' instead of '<img>' ---
+            const contentElements = container.querySelectorAll('picture, div:not(.film-strip-spacer):not([style*="width: 1px"])');
             
             contentElements.forEach(el => {
                 if (isMobile) {
-                    // On mobile, set width with JS
-                    if (el.tagName.toLowerCase() === 'img') {
+                    if (el.tagName.toLowerCase() === 'picture') {
+                        // This code will now run correctly
                         el.style.width = mobileImageWidthPx + 'px';
-                        if (el.id.endsWith('-module4')){
-                            el.style.height = mobileImageWidthPx/2.35 + 'px'; // Maintain aspect ratio
+                        if (el.parentElement.id.endsWith('-module4')) { // Check parent container ID
+                            el.style.height = mobileImageWidthPx / 2.35 + 'px';
+                        } else {
+                            el.style.height = mobileImageWidthPx / 1.85 + 'px';
                         }
-                        else {el.style.height = mobileImageWidthPx/1.85 + 'px';
-                        } // Maintain aspect ratio
-                    } else { // It's a text block div
+                    } else { 
                         el.style.width = mobileTextBlockWidthPx + 'px';
                         el.style.marginLeft = mobileGapPx + 'px';
                         el.style.marginRight = mobileGapPx + 'px';
                     }
                 } else if (isMixedTouch) {
-                    // On mobile, set width with JS
                     if (el.tagName.toLowerCase() === 'picture') {
+                        // This code will also now run correctly
                         el.style.width = mixedTouchImageWidthPx + 'px';
-                        if (el.id.endsWith('-module4')){
-                            el.style.height = mixedTouchImageWidthPx/2.35 + 'px'; // Maintain aspect ratio
+                        if (el.parentElement.id.endsWith('-module4')) { // Check parent container ID
+                            el.style.height = mixedTouchImageWidthPx / 2.35 + 'px';
+                        } else {
+                            el.style.height = mixedTouchImageWidthPx / 1.85 + 'px';
                         }
-                        else {el.style.height = mixedTouchImageWidthPx/1.85 + 'px';
-                        } // Maintain aspect ratio
-                    } else { // It's a text block div
+                    } else {
                         el.style.width = mixedTouchTextBlockWidthPx + 'px';
                         el.style.marginLeft = mixedTouchGapLeftPx + 'px';
                         el.style.marginRight = mixedTouchGapRightPx + 'px'; 
                     }                
                 } else {
-                    // On desktop, remove the inline styles to revert to CSS classes (e.g., w-[170.4rem])
+                    // This desktop logic remains correct
                     el.style.width = ''; 
                     el.style.marginLeft = '';
+                    el.style.marginRight = ''; // Also clear marginRight for desktop
+                    el.style.height = ''; // Also clear height for desktop
                 }
             });
         });

@@ -685,7 +685,7 @@ body, #main-content-wrapper {
         margin-bottom: 60rem !important; /* Space between film strips */
     }
 
-    #films-image-1,
+    #films-image-1-module1,
     #films-image-1-module2,
     #films-image-1-module3,
     #films-image-1-module4 {
@@ -946,7 +946,7 @@ body, #main-content-wrapper {
         display: hidden;
     }
 
-    #films-image-1,
+    #films-image-1-module1,
     #films-image-1-module2,
     #films-image-1-module3,
     #films-image-1-module4 {
