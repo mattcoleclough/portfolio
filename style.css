@@ -689,7 +689,7 @@ body, #main-content-wrapper {
     #films-image-1-module2,
     #films-image-1-module3,
     #films-image-1-module4 {
-        margin-left: 30rem !important; /* Center the film images */
+        margin-left: 20rem !important; /* Center the film images */
     }
 
     #filmsimage-3-module1,
@@ -742,7 +742,6 @@ body, #main-content-wrapper {
     #copyright-text {
         margin-top: 20rem !important; /* Space below contact section */
         margin-bottom: 30rem !important; /* Smaller copyright text */
-        text-size-adjust: 100%;
     }
 }
     /* --- END OF Phone Portrait Media Query --- */
