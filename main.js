@@ -662,7 +662,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         document.querySelectorAll('.film-scroll-container').forEach(container => {
             // Get all direct children that are images or text blocks
-            if (isMobile || isMixedTouch) {
+            //if (isMobile || isMixedTouch) {
                 // Calculate the available width from the container's left edge to the viewport's right edge
                 const containerRect = container.getBoundingClientRect();
                 const containerLeft = containerRect.left;
@@ -670,10 +670,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Set the container's width dynamically to fill the space
                 container.style.width = newWidth + 'px';
-            } else {
+            //} else {
                 // On desktop, remove the inline style to revert to the CSS-defined width (e.g., 307.5rem)
-                container.style.width = ''; 
-            }
+                //container.style.width = ''; 
+            //}
 
             const contentElements = container.querySelectorAll('img, div:not(.film-strip-spacer):not([style*="width: 1px"])');
             
@@ -694,7 +694,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 } else if (isMixedTouch) {
                     // On mobile, set width with JS
-                    if (el.tagName.toLowerCase() === 'img') {
+                    if (el.tagName.toLowerCase() === 'picture') {
                         el.style.width = mixedTouchImageWidthPx + 'px';
                         if (el.id.endsWith('-module4')){
                             el.style.height = mixedTouchImageWidthPx/2.35 + 'px'; // Maintain aspect ratio
@@ -718,7 +718,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Constants for Layout Logic ---
     const LAYOUT_MIN_VIDEO_TOP_MARGIN_REM = 0.5;
     const LAYOUT_MIN_VIDEO_BOTTOM_MARGIN_REM = 9.02; 
-    const LAYOUT_THRESHOLD_CASE1_MAX_REM = 227; // 227.4072rem is the threshold for Case 1
+    const LAYOUT_THRESHOLD_CASE1_MAX_REM = 230; // 227.4072rem is the threshold for Case 1
     const LAYOUT_THRESHOLD_CASE2_MAX_REM = 250;
 
     const LAYOUT_CASE2_EXCESS_BASE_REM = LAYOUT_THRESHOLD_CASE1_MAX_REM;
@@ -974,7 +974,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             console.log("Final layout calculations (video aspect ratio, title positions) have been applied.");
-        }, 10);
+        }, 0);
     };
 
     let globalDesktopMouseMoveListener = null; 
