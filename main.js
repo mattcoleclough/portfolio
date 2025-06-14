@@ -678,6 +678,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const contentElements = container.querySelectorAll('picture, div:not(.film-strip-spacer):not([style*="width: 1px"])');
             
             contentElements.forEach(el => {
+                if (el.parentElement.id.startsWith('films-image-3')){
+                            el.style.marginRight = '';
+                        }
                 if (isMobile) {
                     // On mobile, set width with JS
                     if (el.tagName.toLowerCase() === 'picture') {
