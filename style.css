@@ -251,13 +251,13 @@ body, #main-content-wrapper {
 
 /* Default state for Play (when video is PAUSED, button shows PLAY icon) */
 #custom-play-pause-button.display-play-svg .icon-shape {
-    -webkit-mask-image: url(assets/VideoControls/play.svg);
-    mask-image: url(assets/VideoControls/play.svg);
+    -webkit-mask-image: url(/ASSETS/VideoControls/play.svg);
+    mask-image: url(/ASSETS/VideoControls/play.svg);
 }
 /* Hover state for Play (ACTION: Play the video) */
 #custom-play-pause-button.display-play-svg:hover .icon-shape {
-    -webkit-mask-image: url(assets/VideoControls/play-hover.svg); /* Use FILLED play icon */
-    mask-image: url(assets/VideoControls/play-hover.svg);
+    -webkit-mask-image: url(/ASSETS/VideoControls/play-hover.svg); /* Use FILLED play icon */
+    mask-image: url(/ASSETS/VideoControls/play-hover.svg);
     background-color: cyan;
 }
 #custom-play-pause-button:hover { /* For the button container itself */
@@ -266,13 +266,13 @@ body, #main-content-wrapper {
 
 /* Default state for Pause (when video is PLAYING, button shows PAUSE icon) */
 #custom-play-pause-button.display-pause-svg .icon-shape {
-    -webkit-mask-image: url(assets/VideoControls/pause.svg);
-    mask-image: url(assets/VideoControls/pause.svg);
+    -webkit-mask-image: url(/ASSETS/VideoControls/pause.svg);
+    mask-image: url(/ASSETS/VideoControls/pause.svg);
 }
 /* Hover state for Pause (ACTION: Pause the video) */
 #custom-play-pause-button.display-pause-svg:hover .icon-shape {
-    -webkit-mask-image: url(assets/VideoControls/pause-hover.svg); /* Use FILLED pause icon */
-    mask-image: url(assets/VideoControls/pause-hover.svg);
+    -webkit-mask-image: url(/ASSETS/VideoControls/pause-hover.svg); /* Use FILLED pause icon */
+    mask-image: url(/ASSETS/VideoControls/pause-hover.svg);
     background-color: cyan;
 }
 
@@ -285,13 +285,13 @@ body, #main-content-wrapper {
 
 /* Default state for Mute (when video is UNMUTED, button shows MUTE icon) */
 #custom-mute-unmute-button.display-mute-svg .icon-shape {
-    -webkit-mask-image: url(assets/VideoControls/mute.svg);
-    mask-image: url(assets/VideoControls/mute.svg);
+    -webkit-mask-image: url(/ASSETS/VideoControls/mute.svg);
+    mask-image: url(/ASSETS/VideoControls/mute.svg);
 }
 /* Hover state for Mute (ACTION: Mute the video) */
 #custom-mute-unmute-button.display-mute-svg:hover .icon-shape {
-    -webkit-mask-image: url(assets/VideoControls/mute-hover.svg); /* Use FILLED mute icon */
-    mask-image: url(assets/VideoControls/mute-hover.svg);
+    -webkit-mask-image: url(/ASSETS/VideoControls/mute-hover.svg); /* Use FILLED mute icon */
+    mask-image: url(/ASSETS/VideoControls/mute-hover.svg);
     background-color: cyan;
 }
 #custom-mute-unmute-button:hover { /* For the button container itself */
@@ -300,13 +300,13 @@ body, #main-content-wrapper {
 
 /* Default state for Unmute (when video is MUTED, button shows UNMUTE icon) */
 #custom-mute-unmute-button.display-unmute-svg .icon-shape {
-    -webkit-mask-image: url(assets/VideoControls/unmute.svg);
-    mask-image: url(assets/VideoControls/unmute.svg);
+    -webkit-mask-image: url(/ASSETS/VideoControls/unmute.svg);
+    mask-image: url(/ASSETS/VideoControls/unmute.svg);
 }
 /* Hover state for Unmute (ACTION: Unmute the video) */
 #custom-mute-unmute-button.display-unmute-svg:hover .icon-shape {
-    -webkit-mask-image: url(assets/VideoControls/unmute-hover.svg); /* Use FILLED unmute icon */
-    mask-image: url(assets/VideoControls/unmute-hover.svg);
+    -webkit-mask-image: url(/ASSETS/VideoControls/unmute-hover.svg); /* Use FILLED unmute icon */
+    mask-image: url(/ASSETS/VideoControls/unmute-hover.svg);
     background-color: cyan;
 }
 
@@ -319,13 +319,13 @@ body, #main-content-wrapper {
 
 /* Default state for Fullscreen (when NOT IN FULLSCREEN, button shows ENTER FULLSCREEN icon) */
 #custom-fullscreen-button.display-fullscreen-svg .icon-shape {
-    -webkit-mask-image: url(assets/VideoControls/fullscreen.svg);
-    mask-image: url(assets/VideoControls/fullscreen.svg);
+    -webkit-mask-image: url(/ASSETS/VideoControls/fullscreen.svg);
+    mask-image: url(/ASSETS/VideoControls/fullscreen.svg);
 }
 /* Hover state for Fullscreen (ACTION: Enter Fullscreen) */
 #custom-fullscreen-button.display-fullscreen-svg:hover .icon-shape {
-    -webkit-mask-image: url(assets/VideoControls/fullscreen-hover.svg); /* Use FILLED fullscreen icon */
-    mask-image: url(assets/VideoControls/fullscreen-hover.svg);
+    -webkit-mask-image: url(/ASSETS/VideoControls/fullscreen-hover.svg); /* Use FILLED fullscreen icon */
+    mask-image: url(/ASSETS/VideoControls/fullscreen-hover.svg);
     background-color: cyan;
 }
 #custom-fullscreen-button:hover { /* For the button container itself */
@@ -334,25 +334,25 @@ body, #main-content-wrapper {
 
 /* Default state for Exit Fullscreen (when IN FULLSCREEN, button shows EXIT FULLSCREEN icon) */
 #custom-fullscreen-button.display-exit-fullscreen-svg .icon-shape {
-    -webkit-mask-image: url(assets/VideoControls/exit-fullscreen.svg);
-    mask-image: url(assets/VideoControls/exit-fullscreen.svg);
+    -webkit-mask-image: url(/ASSETS/VideoControls/exit-fullscreen.svg);
+    mask-image: url(/ASSETS/VideoControls/exit-fullscreen.svg);
 }
 /* Hover state for Exit Fullscreen (ACTION: Exit Fullscreen) */
 #custom-fullscreen-button.display-exit-fullscreen-svg:hover .icon-shape {
-    -webkit-mask-image: url(assets/VideoControls/exit-fullscreen-hover.svg); /* Use FILLED exit-fullscreen icon */
-    mask-image: url(assets/VideoControls/exit-fullscreen-hover.svg);
+    -webkit-mask-image: url(/ASSETS/VideoControls/exit-fullscreen-hover.svg); /* Use FILLED exit-fullscreen icon */
+    mask-image: url(/ASSETS/VideoControls/exit-fullscreen-hover.svg);
     background-color: cyan;
 }
 
 /* Classes to apply SVG masks */
 #custom-fullscreen-button.display-fullscreen-svg .icon-shape {
-    -webkit-mask-image: url(assets/VideoControls/fullscreen.svg);
-    mask-image: url(assets/VideoControls/fullscreen.svg);
+    -webkit-mask-image: url(/ASSETS/VideoControls/fullscreen.svg);
+    mask-image: url(/ASSETS/VideoControls/fullscreen.svg);
 }
 
 #custom-fullscreen-button.display-exit-fullscreen-svg .icon-shape {
-    -webkit-mask-image: url(assets/VideoControls/exit-fullscreen.svg);
-    mask-image: url(assets/VideoControls/exit-fullscreen.svg);
+    -webkit-mask-image: url(/ASSETS/VideoControls/exit-fullscreen.svg);
+    mask-image: url(/ASSETS/VideoControls/exit-fullscreen.svg);
 }
 
 #social-icons-container {
