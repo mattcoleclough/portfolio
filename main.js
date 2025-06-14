@@ -678,9 +678,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const contentElements = container.querySelectorAll('picture, div:not(.film-strip-spacer):not([style*="width: 1px"])');
             
             contentElements.forEach(el => {
-                if (el.parentElement.id.startsWith('films-image-3')){
-                            el.style.marginRight = '';
-                        }
                 if (isMobile) {
                     // On mobile, set width with JS
                     if (el.tagName.toLowerCase() === 'picture') {
@@ -690,6 +687,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                         else {el.style.height = mobileImageWidthPx/1.85 + 'px';
                         } // Maintain aspect ratio
+                        if (el.parentElement.id.startsWith('films-image-3')){
+                            el.style.marginRight = 30*remToPxRatio + 'px';
+                        }
                     } else { // It's a text block div
                         el.style.width = mobileTextBlockWidthPx + 'px';
                         el.style.marginLeft = mobileGapPx + 'px';
@@ -704,6 +704,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                         else {el.style.height = mixedTouchImageWidthPx/1.85 + 'px';
                         } // Maintain aspect ratio
+                        if (el.parentElement.id.startsWith('films-image-3')){
+                            el.style.marginRight = 30*remToPxRatio + 'px';
+                        }
                     } else { // It's a text block div
                         el.style.width = mixedTouchTextBlockWidthPx + 'px';
                         el.style.marginLeft = mixedTouchGapLeftPx + 'px';
