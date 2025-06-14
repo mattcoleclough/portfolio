@@ -1701,9 +1701,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const videoShowreelSectionForInitialLoad = document.getElementById('video-showreel-section');
 
     window.addEventListener('resize', handleLayoutRecalculation);
+    window.addEventListener('orientationchange', handleLayoutRecalculation);
     if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', handleLayoutRecalculation);
     }
+   
 
     if (initialBuffer && fadeOverlay && aboutHeadingElementForInitialLoad && videoShowreelSectionForInitialLoad) {
         window.addEventListener('load', () => {
