@@ -678,7 +678,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const contentElements = container.querySelectorAll('picture, div:not(.film-strip-spacer):not([style*="width: 1px"])');
             
             contentElements.forEach(el => {
-                if (el.parentElement.id.startsWith('films-images-3')){
+                if (el.parentElement.id.startsWith('filmsimage-3')){
                             el.style.marginRight = 30*remToPxRatio + 'px'; // Right margins for end pictures.
                         }
             });
