@@ -564,7 +564,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const title = wrapper.querySelector('[id^="title-text-module"], #title-text-module1');
         const year = wrapper.querySelector('[id^="year-text-module"], #year-text-module1');
-        const thirdImage = container.querySelector('img:nth-of-type(3)');
+        const thirdImage = container.querySelector('picture:nth-of-type(3) img');
 
         // --- VERTICAL POSITIONING ---
         const scrollContainer = wrapper.querySelector('.film-scroll-container');
