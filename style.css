@@ -950,14 +950,14 @@ body, #main-content-wrapper {
     #films-image-1-module2,
     #films-image-1-module3,
     #films-image-1-module4 {
-        margin-left: 35rem !important; /* Center the film images */
+        margin-left: 45rem !important; /* Center the film images */
     }
 
     #filmsimage-3-module1,
     #filmsimage-3-module2,
     #filmsimage-3-module3,
     #filmsimage-3-module4 {
-        margin-right: 12rem !important; /* Center the film images */
+        margin-right: 30rem !important; /* Center the film images */
     }
     #castCrew1,
     #castCrew2,
