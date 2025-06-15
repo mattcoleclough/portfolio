@@ -1788,16 +1788,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     const remToPxRatio = parseFloat(getComputedStyle(document.documentElement).fontSize);
                     
                     const hardHeadroom = (isMobile) ? HARD_HEADROOM_REM_MOBILE : HARD_HEADROOM_REM_MIXED_TOUCH;
+                    const softHeadroom = (isMobile) ? desiredHeadroomRemMobile : desiredHeadroomRemMixedTouch;
                     const hardHeadroomPx = hardHeadroom * remToPxRatio;
+                    const softHeadroomPx = softHeadroom * remToPxRatio;
                     
                     const videoTopAbsolute = videoShowreelSection.getBoundingClientRect().top + mainContentWrapper.scrollTop;
                     const hardLimitPx = videoTopAbsolute - hardHeadroomPx;
+                    const softLimitPx = videoTopAbsolute - softHeadroomPx;
                     
                     // If an inertial fling goes past the hard limit, snap it back.
                     // This does not cause flicker because the user's finger is not fighting it.
                     if (mainContentWrapper.scrollTop < hardLimitPx) {
                         mainContentWrapper.scrollTop = softLimitPx;
-                        //checkAndCorrectScrollPosition();
+                        checkAndCorrectScrollPosition();
                     }
                 }
             } else {
