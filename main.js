@@ -820,7 +820,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const videoAbsoluteTopWithoutMargin = videoRect.top + mainContentWrapper.scrollTop - videoCurrentActualMarginTopPx;
 
                 if (videoShowreelSection) { // Ensure videoShowreelSection element is available
-                    const mobileHeadroomRem = 60; // Desired space above the video section's top margin line
+                    const mobileHeadroomRem = 45; // Desired space above the video section's top margin line
                     // videoShowreelSection.offsetTop includes its CSS-defined marginTop.
                     touchScrollTargetPx = videoAbsoluteTopWithoutMargin - (mobileHeadroomRem * remToPxRatio);
                     touchScrollTargetPx = Math.max(0, touchScrollTargetPx); // Ensure it's not negative
