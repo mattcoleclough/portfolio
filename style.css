@@ -523,7 +523,7 @@ body, #main-content-wrapper {
 
     #video-showreel-section {
         margin-top: 75rem !important; /* Adjust top margin for phone portrait */
-        margin-bottom: 90rem !important;
+        margin-bottom: 55rem !important;
         margin-left: 0rem !important; /* Center the video section */
         margin-right: 0rem !important; /* Center the video section */
         height: auto;
@@ -600,7 +600,7 @@ body, #main-content-wrapper {
         align-items: flex-start;
         gap: 20rem;             /* Space between image and text */
         margin-left: 30rem !important;
-        margin-top: 40rem !important; /* Space above the about section */
+        margin-top: 20rem !important; /* Space above the about section */
         margin-right: 33rem !important; /* Center the content */
     }
 
