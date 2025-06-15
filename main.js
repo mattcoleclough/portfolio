@@ -820,7 +820,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const videoAbsoluteTopWithoutMargin = videoRect.top + mainContentWrapper.scrollTop - videoCurrentActualMarginTopPx;
 
                 if (videoShowreelSection) { // Ensure videoShowreelSection element is available
-                    const mobileHeadroomRem = 45; // Desired space above the video section's top margin line
+                    const mobileHeadroomRem = 60; // Desired space above the video section's top margin line
                     // videoShowreelSection.offsetTop includes its CSS-defined marginTop.
                     touchScrollTargetPx = videoAbsoluteTopWithoutMargin - (mobileHeadroomRem * remToPxRatio);
                     touchScrollTargetPx = Math.max(0, touchScrollTargetPx); // Ensure it's not negative
@@ -1742,9 +1742,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- MODIFIED: Scroll listener with DYNAMIC limit and debounced correction ---
         let scrollCorrectionTimeout;
-        const desiredHeadroomRemMobile = 75;
+        const desiredHeadroomRemMobile = 90;
         const desiredHeadroomRemMixedTouch = 10;
-        const HARD_HEADROOM_REM_MOBILE = 75.1;
+        const HARD_HEADROOM_REM_MOBILE = 90.1;
         const HARD_HEADROOM_REM_MIXED_TOUCH = 10.1;
 
         // This function is now called on touchend to handle the soft limit.
