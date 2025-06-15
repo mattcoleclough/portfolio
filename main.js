@@ -1742,10 +1742,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- MODIFIED: Scroll listener with DYNAMIC limit and debounced correction ---
         let scrollCorrectionTimeout;
-        const desiredHeadroomRemMobile = 90;
+        const desiredHeadroomRemMobile = 105;
         const desiredHeadroomRemMixedTouch = 10;
-        const HARD_HEADROOM_REM_MOBILE = 90.1;
-        const HARD_HEADROOM_REM_MIXED_TOUCH = 10.1;
+        const HARD_HEADROOM_REM_MOBILE = 115;
+        const HARD_HEADROOM_REM_MIXED_TOUCH = 20;
 
         // This function is now called on touchend to handle the soft limit.
         function checkAndCorrectScrollPosition() {
@@ -1797,7 +1797,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // This does not cause flicker because the user's finger is not fighting it.
                     if (mainContentWrapper.scrollTop < hardLimitPx) {
                         mainContentWrapper.scrollTop = hardLimitPx;
-                        //checkAndCorrectScrollPosition();
+                        checkAndCorrectScrollPosition();
                     }
                 }
             } else {
