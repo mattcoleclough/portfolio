@@ -980,7 +980,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             console.log("Final layout calculations (video aspect ratio, title positions) have been applied.");
-        }, 0);
+        }, 10);
     };
 
     let globalDesktopMouseMoveListener = null; 
@@ -1708,6 +1708,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('resize', handleLayoutRecalculation);
     window.addEventListener('orientationchange', handleLayoutRecalculation);
+
     if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', handleLayoutRecalculation);
     }
@@ -1744,8 +1745,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let scrollCorrectionTimeout;
         const desiredHeadroomRemMobile = 105;
         const desiredHeadroomRemMixedTouch = 10;
-        const HARD_HEADROOM_REM_MOBILE = 115;
-        const HARD_HEADROOM_REM_MIXED_TOUCH = 20;
+        const HARD_HEADROOM_REM_MOBILE = 105.1;
+        const HARD_HEADROOM_REM_MIXED_TOUCH = 10.1;
 
         // This function is now called on touchend to handle the soft limit.
         function checkAndCorrectScrollPosition() {
@@ -1766,7 +1767,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // If we are still above the soft limit after the touch has ended, animate back.
             if (mainContentWrapper.scrollTop < softLimitPx) {
                 console.log(`Touch ended in headroom. Gently scrolling back to soft limit: ${softLimitPx.toFixed(0)}px`);
-                customSmoothScroll(softLimitPx, 50);
+                customSmoothScroll(softLimitPx, 250);
             }
         }
 
@@ -1800,7 +1801,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // This does not cause flicker because the user's finger is not fighting it.
                     if (mainContentWrapper.scrollTop < hardLimitPx) {
                         mainContentWrapper.scrollTop = softLimitPx;
-                        checkAndCorrectScrollPosition();
+                        //checkAndCorrectScrollPosition();
                     }
                 }
             } else {
