@@ -523,7 +523,7 @@ body, #main-content-wrapper {
 
     #video-showreel-section {
         margin-top: 75rem !important; /* Adjust top margin for phone portrait */
-        margin-bottom: 55rem !important;
+        margin-bottom: 40rem !important;
         margin-left: 0rem !important; /* Center the video section */
         margin-right: 0rem !important; /* Center the video section */
         height: auto;
