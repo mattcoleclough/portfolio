@@ -887,7 +887,7 @@ body, #main-content-wrapper {
     #social-icons-container {
         position: static !important; 
         margin-top: 20rem !important;
-        margin-bottom: 10rem !important;
+        margin-bottom: 0rem !important;
         width: auto !important; /* Let content decide or set specific width */
         height: auto !important;
         left: auto !important;
