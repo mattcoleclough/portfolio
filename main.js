@@ -88,13 +88,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const isMobile = (currentLayoutMode === 'phone_portrait_touch')
         const isMixedTouch = (currentLayoutMode === 'mixed_touch')
         const isDesktop = (currentLayoutMode === 'desktop_mouse')
-        const bumpDuration = 600; // Duration of the scroll out animation
-        const returnDuration = 600; // Duration of the scroll back animation
-        const pauseDuration = 150; // How long to pause at the peak
+        const bumpDuration = 800; // Duration of the scroll out animation
+        const returnDuration = 800; // Duration of the scroll back animation
+        const pauseDuration = 200; // How long to pause at the peak
 
-        const bumpDistanceMobile = 10; // How far to scroll out in pixels
-        const bumpDistanceMixedTouch = 50; // How far to scroll out in pixels
-        const bumpDistanceLargeTablet = 60;
+        const bumpDistanceMobile = 60; // How far to scroll out in pixels
+        const bumpDistanceMixedTouch = 80; // How far to scroll out in pixels
+        const bumpDistanceLargeTablet = 120;
         const bumpDistanceDesktop = 60;
 
         let bumpDistance;
@@ -820,7 +820,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const videoAbsoluteTopWithoutMargin = videoRect.top + mainContentWrapper.scrollTop - videoCurrentActualMarginTopPx;
 
                 if (videoShowreelSection) { // Ensure videoShowreelSection element is available
-                    const mobileHeadroomRem = 105; // Desired space above the video section's top margin line
+                    const mobileHeadroomRem = 90; // Desired space above the video section's top margin line
                     // videoShowreelSection.offsetTop includes its CSS-defined marginTop.
                     touchScrollTargetPx = videoAbsoluteTopWithoutMargin - (mobileHeadroomRem * remToPxRatio);
                     touchScrollTargetPx = Math.max(0, touchScrollTargetPx); // Ensure it's not negative
@@ -980,7 +980,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             console.log("Final layout calculations (video aspect ratio, title positions) have been applied.");
-        }, 10);
+        }, 100);
     };
 
     let globalDesktopMouseMoveListener = null; 
@@ -1743,9 +1743,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- MODIFIED: Scroll listener with DYNAMIC limit and debounced correction ---
         let scrollCorrectionTimeout;
-        const desiredHeadroomRemMobile = 105;
+        const desiredHeadroomRemMobile = 90;
         const desiredHeadroomRemMixedTouch = 10;
-        const HARD_HEADROOM_REM_MOBILE = 105.1;
+        const HARD_HEADROOM_REM_MOBILE = 90.1;
         const HARD_HEADROOM_REM_MIXED_TOUCH = 10.1;
 
         // This function is now called on touchend to handle the soft limit.
