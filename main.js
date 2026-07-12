@@ -1371,11 +1371,9 @@ document.addEventListener('DOMContentLoaded', () => {
         //    user input until the animation lands, then the soft locks take over.
         const scrollOverlay = document.getElementById('scroll-overlay');
         let introFinished = false;
-        let removeSkipListeners = () => {};
         const finishIntro = () => {
             if (introFinished) return;
             introFinished = true;
-            removeSkipListeners();
             if (scrollOverlay) scrollOverlay.style.display = 'none';
             mainContentWrapper.scrollTop = finalScrollTargetY; // land exactly on target
             collapseIntroBuffer(); // composition becomes the top of the scroll range
@@ -1393,20 +1391,6 @@ document.addEventListener('DOMContentLoaded', () => {
             finishIntro();
         } else {
             if (scrollOverlay) scrollOverlay.style.display = 'block';
-
-            // Interruptible: the first deliberate scroll gesture skips straight to
-            // the composition and hands control over, so the visitor never has to
-            // wait out the whole intro to start navigating.
-            const skipIntro = () => finishIntro();
-            const skipEvents = [
-                [scrollOverlay, 'touchstart', { passive: true }],
-                [scrollOverlay, 'mousedown', undefined],
-                [window, 'wheel', { passive: true }],
-                [window, 'keydown', undefined],
-            ];
-            skipEvents.forEach(([el, type, opts]) => el && el.addEventListener(type, skipIntro, opts));
-            removeSkipListeners = () => skipEvents.forEach(([el, type, opts]) => el && el.removeEventListener(type, skipIntro, opts));
-
             animateIntroScroll(revealDistance, cfg.durationMs, finishIntro);
             // Failsafe: never leave the page input-blocked if the animation is interrupted.
             setTimeout(finishIntro, cfg.durationMs + 1000);

@@ -253,10 +253,9 @@ Three phone problems fixed:
   viewport-heights (`INTRO_DESKTOP` / `INTRO_PHONE` at the top of main.js: phone = 2.2
   viewports), and `ensureIntroHeadroom()` grows the buffer in px so that distance is
   actually available. The phone composition now sweeps fully into frame.
-- **Too long before you can navigate.** Phone intro duration cut to 2200ms (from 4500),
-  and the intro is now **interruptible** — the first deliberate scroll gesture
-  (touch / wheel / key) skips straight to the composition and hands over control, so
-  you never wait it out. (Desktop keeps the slower 4500ms; both are interruptible.)
+- **Too long before you can navigate.** Phone intro duration cut to 2200ms (from 4500);
+  desktop keeps 4500ms. (An interrupt-to-skip gesture was tried and removed — it hurt
+  more than it helped; the intro now simply plays through at the set speeds.)
 - **Reload while scrolled down started the intro from the wrong place.** The browser was
   restoring the previous scroll position and fighting the intro positioning. Set
   `history.scrollRestoration = 'manual'` so the page owns its scroll position on every
