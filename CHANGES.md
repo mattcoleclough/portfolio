@@ -242,7 +242,31 @@ every frame, with the motion defined as a gap above the target shrinking from
 mid-intro, the animation follows it and lands exactly on it — no end snap. The old
 `customSmoothScroll` is unchanged and still used for the nav-heading click scrolls.
 
-## 11. Known issues left for you
+## 11. Phone intro tuning: reveal distance, speed, interruptibility, reload (ninth pass)
+
+Three phone problems fixed:
+
+- **Tiny, slow phone reveal.** The reveal distance was capped at one viewport but was
+  really limited by the intro buffer, whose CSS height is in `rem` — and rem scales
+  with viewport *width*, so on a phone the 400rem buffer collapses to a fraction of a
+  screen. The composition barely moved. Now reveal distance is set per device in
+  viewport-heights (`INTRO_DESKTOP` / `INTRO_PHONE` at the top of main.js: phone = 2.2
+  viewports), and `ensureIntroHeadroom()` grows the buffer in px so that distance is
+  actually available. The phone composition now sweeps fully into frame.
+- **Too long before you can navigate.** Phone intro duration cut to 2200ms (from 4500),
+  and the intro is now **interruptible** — the first deliberate scroll gesture
+  (touch / wheel / key) skips straight to the composition and hands over control, so
+  you never wait it out. (Desktop keeps the slower 4500ms; both are interruptible.)
+- **Reload while scrolled down started the intro from the wrong place.** The browser was
+  restoring the previous scroll position and fighting the intro positioning. Set
+  `history.scrollRestoration = 'manual'` so the page owns its scroll position on every
+  load. Combined with the buffer-growth guarantee, the intro now starts identically
+  regardless of where you reloaded from.
+
+Tuning knobs: `INTRO_PHONE` / `INTRO_DESKTOP` (`revealViewports`, `durationMs`) at the
+top of main.js.
+
+## 12. Known issues left for you
 
 - The **Instagram social icon links to `href="#"`** (a dead link that opens a new tab).
   Add the real profile URL or remove the icon.

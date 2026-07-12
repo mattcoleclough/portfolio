@@ -15,6 +15,11 @@ document.addEventListener('mouseup', () => {
 document.addEventListener('DOMContentLoaded', () => {
     const mainContentWrapper = document.getElementById('main-content-wrapper');
 
+    // Own scroll positioning fully: stop the browser restoring the previous
+    // scrollTop on reload, which fought the intro and made a reload-while-scrolled
+    // start the intro from the wrong place ("not enough headroom").
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
     const SCROLL_DAMPENING_FACTOR = 0.25;
 
     const INERTIAL_SCROLL_DAMPING_FACTOR = 0.94; // How quickly velocity decays (0.9 to 0.95 is common). Higher = glides longer.
@@ -22,7 +27,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const MIN_FLING_VELOCITY_THRESHOLD = 0.00; // Velocity (pixels/ms) below which the fling animation stops.
 
     // --- Intro reveal tuning ---
-    const INTRO_SCROLL_DURATION_MS = 4500;      // How long the opening scroll-in takes
+    // revealViewports = how far BELOW the final composition the intro starts, in
+    // viewport heights, so the whole composition sweeps up into frame.
+    // durationMs = how long that scroll-in takes. Tuned separately per device:
+    // the phone gets a longer reveal (so it reads as real movement, not a nudge)
+    // over a shorter time (so the site is navigable sooner).
+    const INTRO_DESKTOP = { revealViewports: 1.0, durationMs: 4500 };
+    const INTRO_PHONE   = { revealViewports: 2.2, durationMs: 2200 };
+
+    function introConfig() {
+        const isPhone = (currentLayoutMode === 'phone_portrait_touch' || currentLayoutMode === 'mixed_touch');
+        return isPhone ? INTRO_PHONE : INTRO_DESKTOP;
+    }
+    function introRevealPx() {
+        return introConfig().revealViewports * window.innerHeight;
+    }
+
+    // Guarantees at least `revealPx` of scrollable headroom above the composition
+    // by growing the intro buffer (and finalScrollTargetY with it) if needed. The
+    // CSS buffer height is in rem, which scales with viewport WIDTH — so on phones
+    // it collapses to a fraction of a screen, which is exactly why the phone reveal
+    // was tiny and slow. Growing it here in px makes the reveal distance reliable
+    // on every device.
+    function ensureIntroHeadroom(revealPx) {
+        const buffer = document.getElementById('initial-buffer');
+        if (!buffer) return;
+        const shortfall = revealPx - finalScrollTargetY;
+        if (shortfall > 0) {
+            buffer.style.height = (buffer.offsetHeight + shortfall) + 'px';
+            finalScrollTargetY += shortfall;
+        }
+    }
 
     // Removes the white intro buffer from the scrollable area so the composition
     // sits at scrollTop 0. From then on, "can't scroll up into the white space"
@@ -948,10 +983,12 @@ document.addEventListener('DOMContentLoaded', () => {
             finalScrollTargetY = scrollTargetPx;
 
             if (isInitialLoad) {
-                // Start up to one viewport ABOVE the target so the intro can scroll
-                // the composition in from the bottom (startFadeActualAnimation
-                // animates from here down to finalScrollTargetY).
-                mainContentWrapper.scrollTop = Math.max(0, finalScrollTargetY - window.innerHeight);
+                // Ensure there's room for the device's full reveal distance, then
+                // start that far above the target so the intro scrolls the whole
+                // composition in from the bottom.
+                const revealPx = introRevealPx();
+                ensureIntroHeadroom(revealPx);
+                mainContentWrapper.scrollTop = Math.max(0, finalScrollTargetY - revealPx);
                 isInitialLoad = false; // Subsequent calls will be treated as resizes
             } else if (initialLoadAndPositioningCompleted) {
                 // Layout shifted (resize/rotation): fold any newly-created headroom
@@ -1334,9 +1371,11 @@ document.addEventListener('DOMContentLoaded', () => {
         //    user input until the animation lands, then the soft locks take over.
         const scrollOverlay = document.getElementById('scroll-overlay');
         let introFinished = false;
+        let removeSkipListeners = () => {};
         const finishIntro = () => {
             if (introFinished) return;
             introFinished = true;
+            removeSkipListeners();
             if (scrollOverlay) scrollOverlay.style.display = 'none';
             mainContentWrapper.scrollTop = finalScrollTargetY; // land exactly on target
             collapseIntroBuffer(); // composition becomes the top of the scroll range
@@ -1344,19 +1383,33 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Intro scroll complete. Page interactive.");
         };
 
+        const cfg = introConfig();
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        // How far below the target we start (the video's rise distance). Capped at
-        // one viewport and at the target itself. The animation tracks the live
-        // target, so this only needs to be the initial gap, not a fixed endpoint.
-        const revealDistance = Math.min(window.innerHeight, Math.max(0, finalScrollTargetY));
+        // The animation tracks the live target, so this is just the initial gap.
+        // Capped at the available headroom (which ensureIntroHeadroom sized to fit).
+        const revealDistance = Math.min(introRevealPx(), Math.max(0, finalScrollTargetY));
 
         if (prefersReducedMotion || revealDistance <= 1) {
             finishIntro();
         } else {
             if (scrollOverlay) scrollOverlay.style.display = 'block';
-            animateIntroScroll(revealDistance, INTRO_SCROLL_DURATION_MS, finishIntro);
+
+            // Interruptible: the first deliberate scroll gesture skips straight to
+            // the composition and hands control over, so the visitor never has to
+            // wait out the whole intro to start navigating.
+            const skipIntro = () => finishIntro();
+            const skipEvents = [
+                [scrollOverlay, 'touchstart', { passive: true }],
+                [scrollOverlay, 'mousedown', undefined],
+                [window, 'wheel', { passive: true }],
+                [window, 'keydown', undefined],
+            ];
+            skipEvents.forEach(([el, type, opts]) => el && el.addEventListener(type, skipIntro, opts));
+            removeSkipListeners = () => skipEvents.forEach(([el, type, opts]) => el && el.removeEventListener(type, skipIntro, opts));
+
+            animateIntroScroll(revealDistance, cfg.durationMs, finishIntro);
             // Failsafe: never leave the page input-blocked if the animation is interrupted.
-            setTimeout(finishIntro, INTRO_SCROLL_DURATION_MS + 1000);
+            setTimeout(finishIntro, cfg.durationMs + 1000);
         }
     }
 
