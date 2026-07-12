@@ -1376,6 +1376,7 @@ document.addEventListener('DOMContentLoaded', () => {
             introFinished = true;
             if (scrollOverlay) scrollOverlay.style.display = 'none';
             mainContentWrapper.scrollTop = finalScrollTargetY; // land exactly on target
+            mainContentWrapper.style.overflowY = ''; // restore native scrolling (see below)
             collapseIntroBuffer(); // composition becomes the top of the scroll range
             initialLoadAndPositioningCompleted = true;
             console.log("Intro scroll complete. Page interactive.");
@@ -1391,6 +1392,11 @@ document.addEventListener('DOMContentLoaded', () => {
             finishIntro();
         } else {
             if (scrollOverlay) scrollOverlay.style.display = 'block';
+            // Make the container non-scrollable for the duration of the intro. JS can
+            // still animate scrollTop, but the browser gives the finger/wheel nothing
+            // to scroll — so native scrolling can't fight the animation (the jitter).
+            // Restored in finishIntro.
+            mainContentWrapper.style.overflowY = 'hidden';
             animateIntroScroll(revealDistance, cfg.durationMs, finishIntro);
             // Failsafe: never leave the page input-blocked if the animation is interrupted.
             setTimeout(finishIntro, cfg.durationMs + 1000);

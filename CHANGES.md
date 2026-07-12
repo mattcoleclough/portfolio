@@ -256,6 +256,11 @@ Three phone problems fixed:
 - **Too long before you can navigate.** Phone intro duration cut to 2200ms (from 4500);
   desktop keeps 4500ms. (An interrupt-to-skip gesture was tried and removed — it hurt
   more than it helped; the intro now simply plays through at the set speeds.)
+- **Jitter when trying to scroll during the intro.** The `#scroll-overlay` blocked taps
+  but not the browser's native touch-scroll of the container, so a finger-scroll fought
+  the JS `animateIntroScroll` (both writing scrollTop). Now the container is set
+  `overflow-y: hidden` for the duration of the intro — JS can still animate scrollTop,
+  but there's no native scroll to fight — and restored when the intro finishes.
 - **Reload while scrolled down started the intro from the wrong place.** The browser was
   restoring the previous scroll position and fighting the intro positioning. Set
   `history.scrollRestoration = 'manual'` so the page owns its scroll position on every
