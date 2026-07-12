@@ -21,48 +21,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const MIN_VELOCITY_TO_INITIATE_FLING = 0.1; // Minimum swipe velocity (pixels/ms) to trigger a fling.
     const MIN_FLING_VELOCITY_THRESHOLD = 0.00; // Velocity (pixels/ms) below which the fling animation stops.
 
-    // --- Intro reveal & desktop soft-lock tuning ---
+    // --- Intro reveal tuning ---
     const INTRO_SCROLL_DURATION_MS = 4500;      // How long the opening scroll-in takes
-    const DESKTOP_SPRING_ALLOWANCE_REM = 0;    // How far you can pull up into the white space above the video
-    const DESKTOP_SPRING_RETURN_MS = 350;       // How fast the spring-back animates
-    const DESKTOP_SPRING_SETTLE_DELAY_MS = 50;  // Pause after scroll input stops before springing back
-    const DESKTOP_SPRING_ELASTICITY = 4;        // Higher = stretchier (more scrolling needed to approach the allowance); lower = stiffer
-    let desktopSpringTimeout;
-    let desktopSpringAnimationId = null; // Non-null while the spring-back is animating
-    let overscrollPullPx = 0;            // Undampened distance the user has pulled into the white zone
 
-    function cancelDesktopSpring() {
-        if (desktopSpringAnimationId !== null) {
-            cancelAnimationFrame(desktopSpringAnimationId);
-            desktopSpringAnimationId = null;
-        }
-    }
-
-    // Animates back to the composition. Cancellable (unlike customSmoothScroll),
-    // so fresh user input can always take over.
-    function startDesktopSpring() {
-        cancelDesktopSpring();
-        const startY = mainContentWrapper.scrollTop;
-        const distance = finalScrollTargetY - startY;
-        if (Math.abs(distance) < 0.5) {
-            mainContentWrapper.scrollTop = finalScrollTargetY;
-            overscrollPullPx = 0;
-            return;
-        }
-        let springStartTime = null;
-        const step = (now) => {
-            if (springStartTime === null) springStartTime = now;
-            const progress = Math.min((now - springStartTime) / DESKTOP_SPRING_RETURN_MS, 1);
-            const easeOutCubic = (t) => (--t) * t * t + 1;
-            mainContentWrapper.scrollTop = startY + distance * easeOutCubic(progress);
-            if (progress < 1) {
-                desktopSpringAnimationId = requestAnimationFrame(step);
-            } else {
-                desktopSpringAnimationId = null;
-                overscrollPullPx = 0;
-            }
-        };
-        desktopSpringAnimationId = requestAnimationFrame(step);
+    // Removes the white intro buffer from the scrollable area so the composition
+    // sits at scrollTop 0. From then on, "can't scroll up into the white space"
+    // is enforced by the browser's own edge behaviour — iOS rubber-band bounce
+    // on phones (the spring, for free), a plain hard edge on desktop. All the
+    // JS scroll-jacking (hard limits, springs, wheel interception) this replaces
+    // was the main source of jumpy scrolling on phones.
+    function collapseIntroBuffer() {
+        const buffer = document.getElementById('initial-buffer');
+        if (!buffer) return;
+        const bufferHeight = buffer.offsetHeight;
+        const collapsePx = Math.min(bufferHeight, Math.max(0, finalScrollTargetY));
+        if (collapsePx < 1) return;
+        buffer.style.height = (bufferHeight - collapsePx) + 'px';
+        mainContentWrapper.scrollTop = Math.max(0, mainContentWrapper.scrollTop - collapsePx);
+        finalScrollTargetY = Math.max(0, finalScrollTargetY - collapsePx);
     }
 
     // --- Tunable Variable for Contact Heading Alignment ---
@@ -81,78 +57,60 @@ document.addEventListener('DOMContentLoaded', () => {
         canShowControlsOnInitialMove = true;
     }, 2000); // 2000ms delay, can be adjusted
 
-    let isUserTouching = false; // Flag to track if a finger is on the screen
-
-    // Scroll-correction state and headroom constants.
-    // These MUST live at this scope: the touch handlers below reference them,
-    // and they were previously declared inside a later block (out of scope),
-    // which threw a ReferenceError on every touch.
-    let scrollCorrectionTimeout;
-    const desiredHeadroomRemMobile = 90;
-    const desiredHeadroomRemMixedTouch = 10;
-    const HARD_HEADROOM_REM_MOBILE = 90.1;
-    const HARD_HEADROOM_REM_MIXED_TOUCH = 10.1;
-
-    // Called on touchend to gently return the view to the soft scroll limit.
-    function checkAndCorrectScrollPosition() {
-        if (isUserTouching) return; // Don't correct if another touch has already started
-
-        const videoShowreelSection = document.getElementById('video-showreel-section');
-        if (!videoShowreelSection) return;
-
-        const isMobile = (currentLayoutMode === 'phone_portrait_touch');
-        const remToPxRatio = parseFloat(getComputedStyle(document.documentElement).fontSize);
-
-        const softHeadroom = (isMobile) ? desiredHeadroomRemMobile : desiredHeadroomRemMixedTouch;
-        const softHeadroomPx = softHeadroom * remToPxRatio;
-
-        const videoTopAbsolute = videoShowreelSection.getBoundingClientRect().top + mainContentWrapper.scrollTop;
-        const softLimitPx = videoTopAbsolute - softHeadroomPx;
-
-        // If we are still above the soft limit after the touch has ended, animate back.
-        if (mainContentWrapper.scrollTop < softLimitPx) {
-            customSmoothScroll(softLimitPx, 250);
-        }
-    }
-
-    mainContentWrapper.addEventListener('touchstart', () => {
-        isUserTouching = true;
-        // When a new touch starts, cancel any pending smooth scroll correction.
-        clearTimeout(scrollCorrectionTimeout);
-    }, { passive: true });
-
-    mainContentWrapper.addEventListener('touchend', () => {
-        isUserTouching = false;
-        // After the user lifts their finger, check if we need to apply the soft correction.
-        // Use a minimal timeout to allow the final scroll position to settle.
-        setTimeout(checkAndCorrectScrollPosition, 50); 
-    });
-    mainContentWrapper.addEventListener('touchcancel', () => {
-        isUserTouching = false;
-        setTimeout(checkAndCorrectScrollPosition, 50);
-    });
+    // (The touch-based scroll-correction machinery that lived here — headroom
+    // constants, checkAndCorrectScrollPosition, touchstart/touchend handlers —
+    // was removed. Vertical scrolling on touch devices is now fully native:
+    // after the intro, collapseIntroBuffer() makes the composition the top of
+    // the scroll range, so the browser's own edge bounce replaces the JS soft
+    // lock.)
 
     // Select all scroll containers for cursor logic (needs to be available globally)
     const scrollContainers = document.querySelectorAll('.film-scroll-container');
     const cursorHideTimeouts = new Map(); 
     const bumpedModulesOnDesktop = new Set();
 
+    // Intro scroll: eases the view down onto the composition, tracking the LIVE
+    // finalScrollTargetY every frame rather than a value captured at the start.
+    // The motion is defined as a gap above the target shrinking from
+    // `revealDistance` to 0, so if the layout recalculates mid-intro (window.load,
+    // video height resolving, fonts) and moves the target, the animation follows
+    // it and still lands exactly on it — no snap to a different composition at the
+    // end. This was the narrow-window snapping bug.
+    const animateIntroScroll = (revealDistance, duration, callback) => {
+        let startTime = null;
+        const easeOutCubic = (t) => (--t) * t * t + 1;
+
+        const animateScroll = (currentTime) => {
+            if (startTime === null) startTime = currentTime;
+            const timeElapsed = currentTime - startTime;
+            const progress = Math.min(timeElapsed / duration, 1);
+            const gapAboveTarget = revealDistance * (1 - easeOutCubic(progress));
+            mainContentWrapper.scrollTop = Math.max(0, finalScrollTargetY - gapAboveTarget);
+            if (timeElapsed < duration) {
+                requestAnimationFrame(animateScroll);
+            } else if (callback) {
+                callback();
+            }
+        };
+        requestAnimationFrame(animateScroll);
+    };
+
     // Custom Smooth Scroll Function
     const customSmoothScroll = (targetY, duration, callback) => {
-        const startY = mainContentWrapper.scrollTop; 
+        const startY = mainContentWrapper.scrollTop;
         const distance = targetY - startY;
         let startTime = null;
 
         const animateScroll = (currentTime) => {
             if (startTime === null) startTime = currentTime;
             const timeElapsed = currentTime - startTime;
-            const progress = Math.min(timeElapsed / duration, 1); 
-            const easeOutCubic = (t) => (--t) * t * t + 1; 
-            mainContentWrapper.scrollTop = startY + distance * easeOutCubic(progress); 
+            const progress = Math.min(timeElapsed / duration, 1);
+            const easeOutCubic = (t) => (--t) * t * t + 1;
+            mainContentWrapper.scrollTop = startY + distance * easeOutCubic(progress);
             if (timeElapsed < duration) {
                 requestAnimationFrame(animateScroll);
             } else if (callback) {
-                callback(); 
+                callback();
             }
         };
         requestAnimationFrame(animateScroll);
@@ -470,28 +428,12 @@ document.addEventListener('DOMContentLoaded', () => {
             document.removeEventListener('mouseup', onGlobalMouseUp);
         };
 
-        // Touch Event Handlers
-        containerElement.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 1) {
-                startDrag(e.touches[0].pageX, e.touches[0].pageY); // Pass both X and Y
-                document.addEventListener('touchmove', onGlobalTouchMove, { passive: false }); 
-                document.addEventListener('touchend', onGlobalTouchEnd);
-                document.addEventListener('touchcancel', onGlobalTouchEnd);
-            }
-        }, { passive: true }); 
-
-        const onGlobalTouchMove = (e) => {
-            if (isDragging && e.touches.length === 1) {
-                duringDrag(e.touches[0].pageX, e.touches[0].pageY, e);
-            }
-        };
-
-        const onGlobalTouchEnd = () => {
-            endDrag();
-            document.removeEventListener('touchmove', onGlobalTouchMove);
-            document.removeEventListener('touchend', onGlobalTouchEnd);
-            document.removeEventListener('touchcancel', onGlobalTouchEnd);
-        };
+        // (Custom touch dragging removed: on touch devices the strips scroll
+        // natively via overflow-x, which gives the browser's own momentum,
+        // axis-locking and edge behaviour. The JS drag remains for MOUSE only,
+        // since browsers don't drag-scroll with a mouse natively. The 'scroll'
+        // listeners below still fire during native scrolling, so the parallax
+        // titles and shadows keep working.)
 
         // --- Existing mouse wheel and cursor hover logic from your canvas ---
         containerElement.addEventListener('mouseenter', () => {
@@ -1012,11 +954,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 mainContentWrapper.scrollTop = Math.max(0, finalScrollTargetY - window.innerHeight);
                 isInitialLoad = false; // Subsequent calls will be treated as resizes
             } else if (initialLoadAndPositioningCompleted) {
-                // On resize, preserve scroll position relative to content shifts
-                // (gated so it can't fight the intro scroll animation)
-                if (mainContentWrapper.scrollTop < finalScrollTargetY) {
-                    mainContentWrapper.scrollTop = finalScrollTargetY;
-                }
+                // Layout shifted (resize/rotation): fold any newly-created headroom
+                // back into the buffer so the composition stays at scrollTop 0 and
+                // the browser's native top edge remains the scroll limit.
+                collapseIntroBuffer();
             }
 
             console.log(`Layout recalculated. New scroll target: ${finalScrollTargetY.toFixed(0)}px. Current scroll: ${mainContentWrapper.scrollTop.toFixed(0)}px`);
@@ -1398,18 +1339,22 @@ document.addEventListener('DOMContentLoaded', () => {
             introFinished = true;
             if (scrollOverlay) scrollOverlay.style.display = 'none';
             mainContentWrapper.scrollTop = finalScrollTargetY; // land exactly on target
-            initialLoadAndPositioningCompleted = true; // enables the scroll locks
+            collapseIntroBuffer(); // composition becomes the top of the scroll range
+            initialLoadAndPositioningCompleted = true;
             console.log("Intro scroll complete. Page interactive.");
         };
 
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        const introDistance = finalScrollTargetY - mainContentWrapper.scrollTop;
+        // How far below the target we start (the video's rise distance). Capped at
+        // one viewport and at the target itself. The animation tracks the live
+        // target, so this only needs to be the initial gap, not a fixed endpoint.
+        const revealDistance = Math.min(window.innerHeight, Math.max(0, finalScrollTargetY));
 
-        if (prefersReducedMotion || introDistance <= 1) {
+        if (prefersReducedMotion || revealDistance <= 1) {
             finishIntro();
         } else {
             if (scrollOverlay) scrollOverlay.style.display = 'block';
-            customSmoothScroll(finalScrollTargetY, INTRO_SCROLL_DURATION_MS, finishIntro);
+            animateIntroScroll(revealDistance, INTRO_SCROLL_DURATION_MS, finishIntro);
             // Failsafe: never leave the page input-blocked if the animation is interrupted.
             setTimeout(finishIntro, INTRO_SCROLL_DURATION_MS + 1000);
         }
@@ -1878,117 +1823,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         setTimeout(onPageReady, 2000); // hard failsafe
 
-        // --- Scroll listener with DYNAMIC limit ---
-        // (scrollCorrectionTimeout, headroom constants, and checkAndCorrectScrollPosition
-        // are declared near the top of this script so the touch handlers can see them.)
+        // (The desktop wheel-interception soft lock that lived here was removed:
+        // with the intro buffer collapsed, scrollTop 0 IS the composition, so the
+        // browser's native scroll edge enforces the lock on every input source.)
 
-        // --- Desktop elastic soft lock (wheel interception) ---
-        // Once a gesture would carry the view up past the composition, we stop the
-        // browser applying it natively and apply it ourselves with elastic damping:
-        // the page keeps moving during the pull (asymptotically approaching the
-        // allowance), and springs back as soon as wheel deltas stop arriving.
-        // This avoids the old failure mode where the hard clamp pinned the view
-        // instantly but the spring had to wait out the whole trackpad-inertia tail.
-        mainContentWrapper.addEventListener('wheel', (e) => {
-            if (!initialLoadAndPositioningCompleted) return;
-            const isDesktopMode = (currentLayoutMode === 'desktop_mouse' || currentLayoutMode === 'desktop_layout_on_large_touch');
-            if (!isDesktopMode) return;
-            if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return; // horizontal — the film strips own those
-
-            let deltaY = e.deltaY;
-            if (e.deltaMode === 1) deltaY *= 16; // Firefox line-mode wheel
-
-            const scrollTop = mainContentWrapper.scrollTop;
-            const remToPxRatio = parseFloat(getComputedStyle(document.documentElement).fontSize);
-            const allowancePx = DESKTOP_SPRING_ALLOWANCE_REM * remToPxRatio;
-
-            const pullingUpIntoZone = deltaY < 0 && (scrollTop + deltaY) < finalScrollTargetY;
-            const inZone = scrollTop < finalScrollTargetY - 0.5;
-
-            if (pullingUpIntoZone) {
-                e.preventDefault();
-                cancelDesktopSpring();
-                clearTimeout(desktopSpringTimeout);
-
-                if (scrollTop >= finalScrollTargetY) {
-                    // Part of this delta is ordinary scrolling down to the target;
-                    // only the remainder counts as pull.
-                    overscrollPullPx = -(scrollTop + deltaY - finalScrollTargetY);
-                } else {
-                    overscrollPullPx += -deltaY;
-                }
-
-                // Elastic damping: fast at first, asymptotic to the allowance.
-                // (With an allowance of 0 this is simply a hard lock.)
-                const dampenedPx = allowancePx > 0
-                    ? allowancePx * (1 - Math.exp(-overscrollPullPx / (allowancePx * DESKTOP_SPRING_ELASTICITY)))
-                    : 0;
-                mainContentWrapper.scrollTop = finalScrollTargetY - dampenedPx;
-
-                desktopSpringTimeout = setTimeout(startDesktopSpring, DESKTOP_SPRING_SETTLE_DELAY_MS);
-            } else if (deltaY > 0 && inZone) {
-                // Scrolling down while stretched: release the band immediately.
-                e.preventDefault();
-                clearTimeout(desktopSpringTimeout);
-                overscrollPullPx = 0;
-                startDesktopSpring();
-            }
-        }, { passive: false });
-
-        // The scroll listener now only handles the hard limit during inertial scrolling.
+        // Scroll listener: navigation state only. No scroll-jacking — the intro
+        // buffer is collapsed after the intro, so the browser's native top edge
+        // is the scroll limit on every device.
         mainContentWrapper.addEventListener('scroll', () => {
             if (typeof updateNavigationState === 'function') {
                 updateNavigationState();
             }
-            if (!initialLoadAndPositioningCompleted) return;
-
-            if (currentLayoutMode === 'phone_portrait_touch' || currentLayoutMode === 'mixed_touch') {
-                // --- HARD LIMIT ENFORCEMENT ---
-                // This logic only runs when the user is NOT touching (i.e., during a fling).
-                if (!isUserTouching) {
-                    const videoShowreelSection = document.getElementById('video-showreel-section');
-                    if (!videoShowreelSection) return;
-
-                    const isMobile = (currentLayoutMode === 'phone_portrait_touch');
-                    const remToPxRatio = parseFloat(getComputedStyle(document.documentElement).fontSize);
-                    
-                    const hardHeadroom = (isMobile) ? HARD_HEADROOM_REM_MOBILE : HARD_HEADROOM_REM_MIXED_TOUCH;
-                    const softHeadroom = (isMobile) ? desiredHeadroomRemMobile : desiredHeadroomRemMixedTouch;
-                    const hardHeadroomPx = hardHeadroom * remToPxRatio;
-                    const softHeadroomPx = softHeadroom * remToPxRatio;
-                    
-                    const videoTopAbsolute = videoShowreelSection.getBoundingClientRect().top + mainContentWrapper.scrollTop;
-                    const hardLimitPx = videoTopAbsolute - hardHeadroomPx;
-                    const softLimitPx = videoTopAbsolute - softHeadroomPx;
-                    
-                    // If an inertial fling goes past the hard limit, snap it back.
-                    // This does not cause flicker because the user's finger is not fighting it.
-                    if (mainContentWrapper.scrollTop < hardLimitPx) {
-                        mainContentWrapper.scrollTop = softLimitPx;
-                        //checkAndCorrectScrollPosition();
-                    }
-                }
-            } else {
-                // --- Desktop fallback for scroll sources the wheel interceptor
-                // doesn't see (e.g. touch-dragging on a large tablet in desktop
-                // layout). Clamp at the allowance, spring back once settled. ---
-                if (mainContentWrapper.scrollTop < finalScrollTargetY && desktopSpringAnimationId === null) {
-                    const remToPxRatio = parseFloat(getComputedStyle(document.documentElement).fontSize);
-                    const hardLimitPx = finalScrollTargetY - (DESKTOP_SPRING_ALLOWANCE_REM * remToPxRatio);
-
-                    if (mainContentWrapper.scrollTop < hardLimitPx) {
-                        mainContentWrapper.scrollTop = hardLimitPx;
-                    }
-
-                    clearTimeout(desktopSpringTimeout);
-                    desktopSpringTimeout = setTimeout(() => {
-                        if (mainContentWrapper.scrollTop < finalScrollTargetY && desktopSpringAnimationId === null) {
-                            startDesktopSpring();
-                        }
-                    }, DESKTOP_SPRING_SETTLE_DELAY_MS);
-                }
-            }
-        });
+        }, { passive: true });
 
     } else {
         let missing = ["initialBuffer", "fadeOverlay", "aboutHeadingElementForInitialLoad", "videoShowreelSectionForInitialLoad"]

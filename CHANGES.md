@@ -195,7 +195,54 @@ Replaced the long white fade with the scroll-in intro:
   hard lock (no travel, no spring) — a guard prevents the 0-allowance maths from
   producing NaN. Set the allowance back above 0 any time to get the elastic behaviour.
 
-## 9. Known issues left for you
+## 9. Native scrolling rework + Mac resize fix (seventh pass)
+
+The jumpy phone scrolling came from fighting the browser: custom JS touch-dragging on
+the film strips, and per-scroll-frame layout reads + scrollTop snaps enforcing the
+vertical limit during momentum. Both replaced with native mechanisms:
+
+- **The intro buffer now collapses out of the scrollable area** once the intro lands
+  (`collapseIntroBuffer()`): the composition becomes scrollTop 0, so "can't scroll up
+  into the white" is enforced by the browser's own top edge — iOS rubber-band bounce
+  (the spring, for free) on phones, plain hard edge on desktop. Deleted: the desktop
+  wheel interceptor + spring functions + all DESKTOP_SPRING_* constants, the mobile
+  hard/soft headroom enforcement, checkAndCorrectScrollPosition, and the touch
+  handlers supporting them. The scroll listener now only updates navigation state
+  (passive). On resize, any newly-created headroom is folded back into the buffer
+  instead of clamping scrollTop.
+- **Film strips scroll natively on touch.** The custom touchstart/touchmove drag code
+  (with its own fling physics and axis-locking) is gone; overflow-x scrolling gives the
+  browser's momentum and axis-locking. Mouse drag-to-scroll on desktop is kept (browsers
+  don't drag-scroll with a mouse). Parallax titles/shadows still update via scroll events.
+- `overscroll-behavior-y: contain` on the wrapper keeps the edge bounce local (and
+  disables Android pull-to-refresh).
+- **Mac window-resize chaos fixed:** narrowing a desktop window until it's taller than
+  wide flipped `orientation: portrait`, activating the phone/tablet media queries while
+  the JS stayed in desktop mode — two layout systems fighting. All mobile media queries
+  are now additionally gated on `(hover: none) and (pointer: coarse)` (real touch
+  hardware), matching the JS `getLayoutMode()` detection exactly. Desktop windows keep
+  desktop CSS at every size (the vw-based scaling handles narrow widths proportionally);
+  phones and tablets are unaffected.
+
+## 10. Narrow-window intro snap fix (eighth pass)
+
+On narrow windows the slow intro would play, then snap to a different composition
+at the end. Cause: the intro used `customSmoothScroll(finalScrollTargetY, …)`, which
+captured the target ONCE at the start of the 4.5s animation. During those 4.5s
+`handleLayoutRecalculation()` fires again (window.load, the video height resolving,
+fonts) and reassigns `finalScrollTargetY` to a different value — so the animation
+eased toward the stale target and `finishIntro` then snapped scrollTop to the new
+one. Worst on narrow windows because there `vhRem` is large, selecting the Case-3
+layout path whose target depends on the About heading's absolute position, which
+shifts most when the video height settles.
+
+Fix: a dedicated `animateIntroScroll()` that tracks the LIVE `finalScrollTargetY`
+every frame, with the motion defined as a gap above the target shrinking from
+`revealDistance` (one viewport, capped at the target) to 0. However the target moves
+mid-intro, the animation follows it and lands exactly on it — no end snap. The old
+`customSmoothScroll` is unchanged and still used for the nav-heading click scrolls.
+
+## 11. Known issues left for you
 
 - The **Instagram social icon links to `href="#"`** (a dead link that opens a new tab).
   Add the real profile URL or remove the icon.

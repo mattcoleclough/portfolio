@@ -57,6 +57,7 @@ body {
     height: 100vh; /* Make it fill the viewport height */
     overflow-y: scroll; /* Make it vertically scrollable */
     overflow-x: hidden; /* Guard against accidental horizontal panning from sub-pixel rounding */
+    overscroll-behavior-y: contain; /* Keep the native edge bounce local; no scroll chaining / pull-to-refresh */
     /* Custom CSS to hide scrollbar for a cleaner look */
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
@@ -506,7 +507,7 @@ body, #main-content-wrapper {
 
 /* Narrower shadow width on phone portrait (shadows stay disabled while the
    'display: none' lines above are present; 'display: hidden' was invalid). */
-@media (max-width: 600px) and (orientation: portrait) {
+@media (max-width: 600px) and (orientation: portrait) and (hover: none) and (pointer: coarse) {
     .scroll-shadow-wrapper::before {
         width: 5rem;
     }
@@ -519,7 +520,7 @@ body, #main-content-wrapper {
 /* --- Phone Portrait Styles (Max-width: 600px) --- */
 /* =============================================== */
 
-@media (max-width: 600px) and (orientation: portrait) {
+@media (max-width: 600px) and (orientation: portrait) and (hover: none) and (pointer: coarse) {
 
     /* -------------------------------------------------- */
     /* 1. Global Adjustments for Phone Portrait           */
@@ -749,8 +750,8 @@ body, #main-content-wrapper {
 
 /* --- Mixed Touch Styles --- */
 
-    @media (orientation: portrait) and (min-width: 601px) and (max-width: 991px),
-            (orientation: landscape) and (max-height: 500px) {
+    @media (orientation: portrait) and (min-width: 601px) and (max-width: 991px) and (hover: none) and (pointer: coarse),
+            (orientation: landscape) and (max-height: 500px) and (hover: none) and (pointer: coarse) {
 
 
     /* -------------------------------------------------- */
