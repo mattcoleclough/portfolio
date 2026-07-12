@@ -21,6 +21,50 @@ document.addEventListener('DOMContentLoaded', () => {
     const MIN_VELOCITY_TO_INITIATE_FLING = 0.1; // Minimum swipe velocity (pixels/ms) to trigger a fling.
     const MIN_FLING_VELOCITY_THRESHOLD = 0.00; // Velocity (pixels/ms) below which the fling animation stops.
 
+    // --- Intro reveal & desktop soft-lock tuning ---
+    const INTRO_SCROLL_DURATION_MS = 4500;      // How long the opening scroll-in takes
+    const DESKTOP_SPRING_ALLOWANCE_REM = 0;    // How far you can pull up into the white space above the video
+    const DESKTOP_SPRING_RETURN_MS = 350;       // How fast the spring-back animates
+    const DESKTOP_SPRING_SETTLE_DELAY_MS = 50;  // Pause after scroll input stops before springing back
+    const DESKTOP_SPRING_ELASTICITY = 4;        // Higher = stretchier (more scrolling needed to approach the allowance); lower = stiffer
+    let desktopSpringTimeout;
+    let desktopSpringAnimationId = null; // Non-null while the spring-back is animating
+    let overscrollPullPx = 0;            // Undampened distance the user has pulled into the white zone
+
+    function cancelDesktopSpring() {
+        if (desktopSpringAnimationId !== null) {
+            cancelAnimationFrame(desktopSpringAnimationId);
+            desktopSpringAnimationId = null;
+        }
+    }
+
+    // Animates back to the composition. Cancellable (unlike customSmoothScroll),
+    // so fresh user input can always take over.
+    function startDesktopSpring() {
+        cancelDesktopSpring();
+        const startY = mainContentWrapper.scrollTop;
+        const distance = finalScrollTargetY - startY;
+        if (Math.abs(distance) < 0.5) {
+            mainContentWrapper.scrollTop = finalScrollTargetY;
+            overscrollPullPx = 0;
+            return;
+        }
+        let springStartTime = null;
+        const step = (now) => {
+            if (springStartTime === null) springStartTime = now;
+            const progress = Math.min((now - springStartTime) / DESKTOP_SPRING_RETURN_MS, 1);
+            const easeOutCubic = (t) => (--t) * t * t + 1;
+            mainContentWrapper.scrollTop = startY + distance * easeOutCubic(progress);
+            if (progress < 1) {
+                desktopSpringAnimationId = requestAnimationFrame(step);
+            } else {
+                desktopSpringAnimationId = null;
+                overscrollPullPx = 0;
+            }
+        };
+        desktopSpringAnimationId = requestAnimationFrame(step);
+    }
+
     // --- Tunable Variable for Contact Heading Alignment ---
      
     let finalScrollTargetY = 0; // This will now be the single source of truth
@@ -38,6 +82,38 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 2000); // 2000ms delay, can be adjusted
 
     let isUserTouching = false; // Flag to track if a finger is on the screen
+
+    // Scroll-correction state and headroom constants.
+    // These MUST live at this scope: the touch handlers below reference them,
+    // and they were previously declared inside a later block (out of scope),
+    // which threw a ReferenceError on every touch.
+    let scrollCorrectionTimeout;
+    const desiredHeadroomRemMobile = 90;
+    const desiredHeadroomRemMixedTouch = 10;
+    const HARD_HEADROOM_REM_MOBILE = 90.1;
+    const HARD_HEADROOM_REM_MIXED_TOUCH = 10.1;
+
+    // Called on touchend to gently return the view to the soft scroll limit.
+    function checkAndCorrectScrollPosition() {
+        if (isUserTouching) return; // Don't correct if another touch has already started
+
+        const videoShowreelSection = document.getElementById('video-showreel-section');
+        if (!videoShowreelSection) return;
+
+        const isMobile = (currentLayoutMode === 'phone_portrait_touch');
+        const remToPxRatio = parseFloat(getComputedStyle(document.documentElement).fontSize);
+
+        const softHeadroom = (isMobile) ? desiredHeadroomRemMobile : desiredHeadroomRemMixedTouch;
+        const softHeadroomPx = softHeadroom * remToPxRatio;
+
+        const videoTopAbsolute = videoShowreelSection.getBoundingClientRect().top + mainContentWrapper.scrollTop;
+        const softLimitPx = videoTopAbsolute - softHeadroomPx;
+
+        // If we are still above the soft limit after the touch has ended, animate back.
+        if (mainContentWrapper.scrollTop < softLimitPx) {
+            customSmoothScroll(softLimitPx, 250);
+        }
+    }
 
     mainContentWrapper.addEventListener('touchstart', () => {
         isUserTouching = true;
@@ -211,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let isDragging = false; 
         let startX;  
-        let dragstartX = 0; //X position when dragging starts
+        let dragStartX = 0; //X position when dragging starts
         let initialScrollLeftOnDragStart; //Initial scrollLeft when dragging starts         
         let initialScrollLeft; 
         let isMobile;
@@ -495,30 +571,13 @@ document.addEventListener('DOMContentLoaded', () => {
     scrollModules.push(setupFilmScrollModule(filmsScrollContainer4, image3_4));
 
 
-    // Initial setup for cursor and mouse events for all containers
-    scrollContainers.forEach((container, index) => { 
-        const moduleInstance = scrollModules[index]; 
-        if (moduleInstance && typeof moduleInstance.getMaxScroll === 'function') { 
-            updateScrollCursor(container, moduleInstance, false); 
-            
-            container.addEventListener('mouseenter', () => {
-                if (cursorHideTimeouts.has(container)) {
-                    clearTimeout(cursorHideTimeouts.get(container));
-                    cursorHideTimeouts.delete(container);
-                }
-                container.classList.add('active-cursor'); 
-                updateScrollCursor(container, moduleInstance, moduleInstance.getIsDragging()); 
-            });
-
-            container.addEventListener('mouseleave', () => {
-                if (!globalIsMouseDown) { 
-                    if (cursorHideTimeouts.has(container)) {
-                        clearTimeout(cursorHideTimeouts.get(container));
-                        cursorHideTimeouts.delete(container);
-                    }
-                    container.classList.remove('active-cursor', 'cursor-scroll-right', 'cursor-scroll-left', 'cursor-scroll-bidirectional', 'cursor-grabbing');
-                }
-            });
+    // Initial cursor state for all containers.
+    // (Hover listeners are attached once per container inside setupFilmScrollModule;
+    // they were previously duplicated here.)
+    scrollContainers.forEach((container, index) => {
+        const moduleInstance = scrollModules[index];
+        if (moduleInstance && typeof moduleInstance.getMaxScroll === 'function') {
+            updateScrollCursor(container, moduleInstance, false);
         }
     });
 
@@ -566,6 +625,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const year = wrapper.querySelector('[id^="year-text-module"], #year-text-module1');
         const thirdImage = container.querySelector('picture:nth-of-type(3) img');
 
+        if (!title || !year || !thirdImage) return;
+
         // --- VERTICAL POSITIONING ---
         const scrollContainer = wrapper.querySelector('.film-scroll-container');
 
@@ -584,8 +645,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         title.style.top = `${newTopPx}px`;
         year.style.top = `${newTopPx}px`;
-
-        if (!title || !year || !thirdImage) return;
 
         if (currentLayoutMode === 'phone_portrait_touch') {
             title.style.left = (30 * remToPxRatio) + 'px'; // Reset styles if needed      
@@ -837,8 +896,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     scrollTargetPx: touchScrollTargetPx
                 }
                 
-                } else if (isMixedTouch) {
-                let mixedTouchScrollTargetPx = 0;
+                } else { // 'mixed_touch' and any other non-desktop, non-mobile mode
+                let touchScrollTargetPx = 0;
                 const videoRect = videoShowreelSection.getBoundingClientRect();
                 const videoCurrentActualMarginTopPx = parseFloat(getComputedStyle(videoShowreelSection).marginTop) || 0;
                 const videoAbsoluteTopWithoutMargin = videoRect.top + mainContentWrapper.scrollTop - videoCurrentActualMarginTopPx;
@@ -846,8 +905,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const mixedTouchHeadroomRem = 10; // Desired space above the video section's top margin line
                     // videoShowreelSection.offsetTop includes its CSS-defined marginTop.
                     touchScrollTargetPx = videoAbsoluteTopWithoutMargin - (mixedTouchHeadroomRem * remToPxRatio);
-                    touchScrollTargetPx = Math.max(0, touchScrollTargetPx); // Ensure it's not negative 
-                
+                    touchScrollTargetPx = Math.max(0, touchScrollTargetPx); // Ensure it's not negative
+
                 } else {
                     // console.warn("calculateDynamicLayoutAndScroll (Mobile): videoShowreelSection not found for scroll target. Defaulting to 0.");
                     // If you have a default REM scroll target constant, you could use it here:
@@ -897,12 +956,11 @@ document.addEventListener('DOMContentLoaded', () => {
         scrollModules.forEach(module => {
             module.calculateLimits(); 
 
-            const savedProgress = scrollProgressMap.get(module) || 0;
-            const newMaxScroll = module.getMaxScroll();
-            module.scrollLeft = newMaxScroll * savedProgress;
-
-
             const container = module.container;
+            const savedProgress = scrollProgressMap.get(container) || 0;
+            const newMaxScroll = module.getMaxScroll();
+            container.scrollLeft = newMaxScroll * savedProgress;
+
             container.scrollLeft = Math.max(module.getMinScroll(), Math.min(module.getMaxScroll(), container.scrollLeft));
             updateScrollCursor(container, module, module.getIsDragging());
             //updateScrollShadows(module.container);
@@ -948,15 +1006,18 @@ document.addEventListener('DOMContentLoaded', () => {
             finalScrollTargetY = scrollTargetPx;
 
             if (isInitialLoad) {
-                // On the very first load, snap to the calculated target
-                mainContentWrapper.scrollTop = finalScrollTargetY;
+                // Start up to one viewport ABOVE the target so the intro can scroll
+                // the composition in from the bottom (startFadeActualAnimation
+                // animates from here down to finalScrollTargetY).
+                mainContentWrapper.scrollTop = Math.max(0, finalScrollTargetY - window.innerHeight);
                 isInitialLoad = false; // Subsequent calls will be treated as resizes
-            } else {
+            } else if (initialLoadAndPositioningCompleted) {
                 // On resize, preserve scroll position relative to content shifts
+                // (gated so it can't fight the intro scroll animation)
                 if (mainContentWrapper.scrollTop < finalScrollTargetY) {
                     mainContentWrapper.scrollTop = finalScrollTargetY;
                 }
-            } 
+            }
 
             console.log(`Layout recalculated. New scroll target: ${finalScrollTargetY.toFixed(0)}px. Current scroll: ${mainContentWrapper.scrollTop.toFixed(0)}px`);
 
@@ -1035,8 +1096,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const tapListener = () => {
                 // We only want this logic to run after the initial page fade-in is complete.
                 if (!fadeTransitionFired) return;
-
-                setTimeout (500);
 
                 const playPauseBtn = document.getElementById('custom-play-pause-button');
                 const muteBtn = document.getElementById('custom-mute-unmute-button');
@@ -1153,7 +1212,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let muteStateBeforeFullscreen = null;
 
     let windowHasLoadedForFade = false;
-    let isVimeoReadyAndPlayingForFade = !vimeoIframe; 
+    // The intro no longer waits for Vimeo: the video is off-screen when the intro
+    // starts and gets the whole scroll-in as loading time. (Was: !vimeoIframe)
+    let isVimeoReadyAndPlayingForFade = true;
     let fadeInitiatedBySystem = false;
     let fadeTransitionFired = false; 
     
@@ -1315,18 +1376,43 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Fade overlay not found in startFadeActualAnimation");
             return;
         }
-        console.log("Attempting to start fade-out animation of page overlay.");
+
+        // 1. Drop the white overlay. The buffer underneath is also white, so this is
+        //    seamless — the intro scroll below is the real reveal.
         fadeOverlay.style.opacity = '0';
-        fadeOverlay.style.pointerEvents = 'none'; 
-        initialLoadAndPositioningCompleted = true; 
-        console.log("Page overlay fade-up animation initiated. Page interactive.");
+        fadeOverlay.style.pointerEvents = 'none';
 
         setTimeout(() => {
             if (!fadeTransitionFired) {
                 console.warn("Page overlay fade transitionend event did not fire. Forcing overlay removal.");
                 if (fadeOverlay) fadeOverlay.style.display = 'none';
             }
-        }, 3500); 
+        }, 1500);
+
+        // 2. Intro: scroll the composition in from the bottom. #scroll-overlay blocks
+        //    user input until the animation lands, then the soft locks take over.
+        const scrollOverlay = document.getElementById('scroll-overlay');
+        let introFinished = false;
+        const finishIntro = () => {
+            if (introFinished) return;
+            introFinished = true;
+            if (scrollOverlay) scrollOverlay.style.display = 'none';
+            mainContentWrapper.scrollTop = finalScrollTargetY; // land exactly on target
+            initialLoadAndPositioningCompleted = true; // enables the scroll locks
+            console.log("Intro scroll complete. Page interactive.");
+        };
+
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const introDistance = finalScrollTargetY - mainContentWrapper.scrollTop;
+
+        if (prefersReducedMotion || introDistance <= 1) {
+            finishIntro();
+        } else {
+            if (scrollOverlay) scrollOverlay.style.display = 'block';
+            customSmoothScroll(finalScrollTargetY, INTRO_SCROLL_DURATION_MS, finishIntro);
+            // Failsafe: never leave the page input-blocked if the animation is interrupted.
+            setTimeout(finishIntro, INTRO_SCROLL_DURATION_MS + 1000);
+        }
     }
 
     function checkAndStartAllSystemsGoFade() {
@@ -1408,12 +1494,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     //adding the video
 
+    // Fades the (initially invisible) iframe in — called on the player's first
+    // 'play' event, with a timed fallback so the video poster still appears if
+    // autoplay is blocked (e.g. iOS Low Power Mode).
+    let videoIframeRevealed = false;
+    function revealVideoIframe() {
+        if (videoIframeRevealed || !vimeoIframe) return;
+        videoIframeRevealed = true;
+        vimeoIframe.style.opacity = '1';
+    }
+
     if (vimeoIframe) {
         vimeoIframe.src = `https://player.vimeo.com/video/${VIMEO_VIDEO_ID}?autoplay=1&loop=1&muted=1&controls=0&autopause=0&dnt=1&pip=0`;
         vimeoPlayer = new Vimeo.Player(vimeoIframe);
 
         let vimeoReadyAndPlayTimeoutReached = false;
-        const vimeoReadinessAndPlayTimeoutDuration = 5000; 
+        const vimeoReadinessAndPlayTimeoutDuration = 2500; // Was 5000; the intro scroll now buys the video extra loading time anyway
 
         const vimeoReadinessTimer = setTimeout(() => {
             if (!isVimeoReadyAndPlayingForFade) { 
@@ -1533,7 +1629,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (isCurrentlyFullscreen) { vimeoPlayer.exitFullscreen(); } 
                             else { vimeoPlayer.requestFullscreen(); }
                         });
-                    } else
+                    } else {
 
                         if (!vimeoPlayer && !document.fullscreenEnabled && !document.webkitFullscreenEnabled && !document.mozFullScreenEnabled && !document.msFullscreenEnabled) {
                             console.error("Fullscreen click: Fullscreen API not available or player not ready.");
@@ -1597,6 +1693,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                         // The 'fullscreenchange' document event listener will handle calling updateFullscreenButton()
                         showVideoControls(); // Ensure controls are shown after fullscreen toggle
+                    }
                 });
 
                 // Your mouseenter/mouseleave listeners for isMouseOverFullscreenButton remain the same
@@ -1663,6 +1760,18 @@ document.addEventListener('DOMContentLoaded', () => {
             //    updateFullscreenButton();
             //}
 
+            // Reveal ONLY once playback has actually progressed past the threshold.
+            // This is deliberately the single reveal path for normal playback:
+            // 'play' and 'playing' both fire while Vimeo can still be buffering,
+            // which put the spinner on screen mid-fade.
+            const onFirstTimeUpdate = (data) => {
+                if (data && data.seconds > 0.01) {
+                    revealVideoIframe();
+                    vimeoPlayer.off('timeupdate', onFirstTimeUpdate);
+                }
+            };
+            vimeoPlayer.on('timeupdate', onFirstTimeUpdate);
+
             vimeoPlayer.on('play', () => {
                 if (!isVimeoReadyAndPlayingForFade && !vimeoReadyAndPlayTimeoutReached) {
                     clearTimeout(vimeoReadinessTimer);
@@ -1672,6 +1781,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 isCustomVideoPlaying = true;
                 if (typeof updatePlayPauseButton === 'function') updatePlayPauseButton();
             });
+
+            // Fallback for blocked autoplay: if the player is sitting PAUSED
+            // (Vimeo shows its poster, no spinner), reveal it so the visitor can
+            // tap play. If it's still trying to start (spinner up), stay hidden
+            // and let the timeupdate reveal fire when frames arrive. Re-checks a
+            // few times rather than firing blind.
+            let posterFallbackChecks = 0;
+            const posterFallbackCheck = () => {
+                if (videoIframeRevealed) return;
+                vimeoPlayer.getPaused()
+                    .then((paused) => {
+                        if (paused) {
+                            revealVideoIframe();
+                        } else if (++posterFallbackChecks < 5) {
+                            setTimeout(posterFallbackCheck, 2000);
+                        }
+                    })
+                    .catch(() => revealVideoIframe()); // can't tell — show it rather than leave a hole
+            };
+            setTimeout(posterFallbackCheck, 4000);
 
             vimeoPlayer.on('pause', () => {
                 isCustomVideoPlaying = false;
@@ -1715,23 +1844,20 @@ document.addEventListener('DOMContentLoaded', () => {
    
 
     if (initialBuffer && fadeOverlay && aboutHeadingElementForInitialLoad && videoShowreelSectionForInitialLoad) {
-        window.addEventListener('load', () => {
-            console.log("Window loaded. Performing initial layout.");
-            
-            handleLayoutRecalculation(); 
+        // Start as soon as the DOM and fonts are ready — NOT window.load, which
+        // waits for the whole Vimeo iframe document and any eager images. Layout
+        // metrics only depend on fonts; everything else can stream in behind the
+        // intro. window.load and a short timer act as fallbacks.
+        let pageReadyHandled = false;
+        const onPageReady = () => {
+            if (pageReadyHandled) return;
+            pageReadyHandled = true;
+            console.log("Page ready (fonts loaded). Performing initial layout.");
+
+            handleLayoutRecalculation();
 
             windowHasLoadedForFade = true;
             checkAndStartAllSystemsGoFade();
-
-            // Failsafe timeout logic remains the same
-            setTimeout(() => {
-                if (!fadeInitiatedBySystem) {
-                    console.warn("Master timeout for fade initiation (7s). Forcing conditions.");
-                    isVimeoReadyAndPlayingForFade = true;
-                    windowHasLoadedForFade = true;
-                    checkAndStartAllSystemsGoFade();
-                }
-            }, 7000);
 
             if (fadeOverlay) {
                 fadeOverlay.addEventListener('transitionend', () => {
@@ -1739,37 +1865,75 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (fadeOverlay) fadeOverlay.style.display = 'none';
                 }, { once: true });
             }
-        });
+        };
 
-        // --- MODIFIED: Scroll listener with DYNAMIC limit and debounced correction ---
-        let scrollCorrectionTimeout;
-        const desiredHeadroomRemMobile = 90;
-        const desiredHeadroomRemMixedTouch = 10;
-        const HARD_HEADROOM_REM_MOBILE = 90.1;
-        const HARD_HEADROOM_REM_MIXED_TOUCH = 10.1;
-
-        // This function is now called on touchend to handle the soft limit.
-        function checkAndCorrectScrollPosition() {
-            if (isUserTouching) return; // Don't correct if another touch has already started
-
-            const videoShowreelSection = document.getElementById('video-showreel-section');
-            if (!videoShowreelSection) return;
-
-            const isMobile = (currentLayoutMode === 'phone_portrait_touch');
-            const remToPxRatio = parseFloat(getComputedStyle(document.documentElement).fontSize);
-            
-            const softHeadroom = (isMobile) ? desiredHeadroomRemMobile : desiredHeadroomRemMixedTouch;
-            const softHeadroomPx = softHeadroom * remToPxRatio;
-
-            const videoTopAbsolute = videoShowreelSection.getBoundingClientRect().top + mainContentWrapper.scrollTop;
-            const softLimitPx = videoTopAbsolute - softHeadroomPx;
-
-            // If we are still above the soft limit after the touch has ended, animate back.
-            if (mainContentWrapper.scrollTop < softLimitPx) {
-                console.log(`Touch ended in headroom. Gently scrolling back to soft limit: ${softLimitPx.toFixed(0)}px`);
-                customSmoothScroll(softLimitPx, 250);
-            }
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(onPageReady);
         }
+        window.addEventListener('load', () => {
+            onPageReady();
+            // If fonts finished first, still refresh the layout once everything
+            // else has loaded (gated internally, so it can't disturb the intro).
+            handleLayoutRecalculation();
+        });
+        setTimeout(onPageReady, 2000); // hard failsafe
+
+        // --- Scroll listener with DYNAMIC limit ---
+        // (scrollCorrectionTimeout, headroom constants, and checkAndCorrectScrollPosition
+        // are declared near the top of this script so the touch handlers can see them.)
+
+        // --- Desktop elastic soft lock (wheel interception) ---
+        // Once a gesture would carry the view up past the composition, we stop the
+        // browser applying it natively and apply it ourselves with elastic damping:
+        // the page keeps moving during the pull (asymptotically approaching the
+        // allowance), and springs back as soon as wheel deltas stop arriving.
+        // This avoids the old failure mode where the hard clamp pinned the view
+        // instantly but the spring had to wait out the whole trackpad-inertia tail.
+        mainContentWrapper.addEventListener('wheel', (e) => {
+            if (!initialLoadAndPositioningCompleted) return;
+            const isDesktopMode = (currentLayoutMode === 'desktop_mouse' || currentLayoutMode === 'desktop_layout_on_large_touch');
+            if (!isDesktopMode) return;
+            if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return; // horizontal — the film strips own those
+
+            let deltaY = e.deltaY;
+            if (e.deltaMode === 1) deltaY *= 16; // Firefox line-mode wheel
+
+            const scrollTop = mainContentWrapper.scrollTop;
+            const remToPxRatio = parseFloat(getComputedStyle(document.documentElement).fontSize);
+            const allowancePx = DESKTOP_SPRING_ALLOWANCE_REM * remToPxRatio;
+
+            const pullingUpIntoZone = deltaY < 0 && (scrollTop + deltaY) < finalScrollTargetY;
+            const inZone = scrollTop < finalScrollTargetY - 0.5;
+
+            if (pullingUpIntoZone) {
+                e.preventDefault();
+                cancelDesktopSpring();
+                clearTimeout(desktopSpringTimeout);
+
+                if (scrollTop >= finalScrollTargetY) {
+                    // Part of this delta is ordinary scrolling down to the target;
+                    // only the remainder counts as pull.
+                    overscrollPullPx = -(scrollTop + deltaY - finalScrollTargetY);
+                } else {
+                    overscrollPullPx += -deltaY;
+                }
+
+                // Elastic damping: fast at first, asymptotic to the allowance.
+                // (With an allowance of 0 this is simply a hard lock.)
+                const dampenedPx = allowancePx > 0
+                    ? allowancePx * (1 - Math.exp(-overscrollPullPx / (allowancePx * DESKTOP_SPRING_ELASTICITY)))
+                    : 0;
+                mainContentWrapper.scrollTop = finalScrollTargetY - dampenedPx;
+
+                desktopSpringTimeout = setTimeout(startDesktopSpring, DESKTOP_SPRING_SETTLE_DELAY_MS);
+            } else if (deltaY > 0 && inZone) {
+                // Scrolling down while stretched: release the band immediately.
+                e.preventDefault();
+                clearTimeout(desktopSpringTimeout);
+                overscrollPullPx = 0;
+                startDesktopSpring();
+            }
+        }, { passive: false });
 
         // The scroll listener now only handles the hard limit during inertial scrolling.
         mainContentWrapper.addEventListener('scroll', () => {
@@ -1805,9 +1969,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             } else {
-                // --- Desktop scroll lock logic remains unchanged and flicker-free ---
-                if (mainContentWrapper.scrollTop < finalScrollTargetY) {
-                mainContentWrapper.scrollTop = finalScrollTargetY;
+                // --- Desktop fallback for scroll sources the wheel interceptor
+                // doesn't see (e.g. touch-dragging on a large tablet in desktop
+                // layout). Clamp at the allowance, spring back once settled. ---
+                if (mainContentWrapper.scrollTop < finalScrollTargetY && desktopSpringAnimationId === null) {
+                    const remToPxRatio = parseFloat(getComputedStyle(document.documentElement).fontSize);
+                    const hardLimitPx = finalScrollTargetY - (DESKTOP_SPRING_ALLOWANCE_REM * remToPxRatio);
+
+                    if (mainContentWrapper.scrollTop < hardLimitPx) {
+                        mainContentWrapper.scrollTop = hardLimitPx;
+                    }
+
+                    clearTimeout(desktopSpringTimeout);
+                    desktopSpringTimeout = setTimeout(() => {
+                        if (mainContentWrapper.scrollTop < finalScrollTargetY && desktopSpringAnimationId === null) {
+                            startDesktopSpring();
+                        }
+                    }, DESKTOP_SPRING_SETTLE_DELAY_MS);
                 }
             }
         });

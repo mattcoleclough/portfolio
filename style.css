@@ -2,18 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-    font-family: 'Fluxisch Else';
-    src: url('ASSETS/Fonts/FluxischElse-Regular.woff') format('woff');
-    font-weight: normal; /* Set font-weight to 'light' as requested */
-    font-style: normal;
-    font-display: swap;
-}
-/* Light weight for Fluxisch Else */
+/* Weight mapping — two deliberate quirks, both needed to match the live site:
+
+   1. The LIGHT cut is mapped to the normal weight range (300-400), so all body
+      text renders Light. This matches the live site, where the Light @font-face
+      accidentally overrode Regular at weight 400. The Regular cut is unused
+      (FluxischElse-Regular.woff stays in ASSETS if ever wanted).
+
+   2. Inline styles must say font-weight: normal — NEVER 300. Browsers style
+      <b>/<strong> as font-weight: bolder, which is RELATIVE: bolder(400) = 700
+      (Bold cut), but bolder(300) = only 400. The <strong>-wrapped apostrophes
+      exist specifically to use the Bold cut's apostrophe glyph — the Light
+      cut's straight apostrophe is ~4x wider. Setting body text to 300 breaks
+      every bold and every apostrophe at once. */
 @font-face {
     font-family: 'Fluxisch Else';
     src: url('ASSETS/Fonts/FluxischElse-Light.woff') format('woff');
-    font-weight: light; /* Set font-weight to 'light' as requested */
+    font-weight: 300 400;
     font-style: normal;
     font-display: swap;
 }
@@ -21,7 +26,7 @@
 @font-face {
     font-family: 'Fluxisch Else';
     src: url('ASSETS/Fonts/FluxischElse-Bold.woff') format('woff');
-    font-weight: bold; /* Set font-weight to 'light' as requested */
+    font-weight: bold;
     font-style: normal;
     font-display: swap;
 }
@@ -51,6 +56,7 @@ body {
 #main-content-wrapper {
     height: 100vh; /* Make it fill the viewport height */
     overflow-y: scroll; /* Make it vertically scrollable */
+    overflow-x: hidden; /* Guard against accidental horizontal panning from sub-pixel rounding */
     /* Custom CSS to hide scrollbar for a cleaner look */
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
@@ -95,6 +101,17 @@ body, #main-content-wrapper {
     cursor: default; /* Explicitly set default cursor for the overlay */
 }
 
+/* --- Video loading treatment ---
+   The placeholder is a black card with the design's normal drop shadow
+   (Tailwind shadow-lg from the HTML class) throughout. The iframe stays
+   hidden until frames are actually rendering (see main.js), so the Vimeo
+   buffering spinner never shows — the video simply appears on the card,
+   and its own opening fade does the reveal. */
+#vimeo-player-iframe {
+    opacity: 0;
+    transition: opacity 0.2s ease-in;
+}
+
 
 /* Make the background of scrollable containers white */
 .film-scroll-container {
@@ -126,7 +143,7 @@ body, #main-content-wrapper {
     background-color: white;
     z-index: 100; /* Ensure it's on top of everything */
     opacity: 1; /* Start fully opaque */
-    transition: opacity 2.5s ease-out; /* Fade out over 2.5 seconds */
+    transition: opacity 0.3s ease-out; /* Quick fade — the intro scroll is the real reveal */
     pointer-events: auto; /* Start by blocking interaction */
 }
 
@@ -462,10 +479,13 @@ body, #main-content-wrapper {
     transition: opacity 0.3s ease-in-out;
 }
 
-/* Left shadow styles */
+/* Left shadow styles.
+   NOTE: 'display: none' keeps the scroll-edge shadows DISABLED site-wide,
+   even though the JS still toggles the show-left/right-shadow classes.
+   Delete the two 'display: none' lines to re-enable them. */
 .scroll-shadow-wrapper::before {
     left: 0;
-    width: 8rem; 
+    width: 8rem;
     background: linear-gradient(to right, #80808080, #80808000);
     display: none;
 }
@@ -484,16 +504,15 @@ body, #main-content-wrapper {
     opacity: 1;
 }
 
+/* Narrower shadow width on phone portrait (shadows stay disabled while the
+   'display: none' lines above are present; 'display: hidden' was invalid). */
 @media (max-width: 600px) and (orientation: portrait) {
     .scroll-shadow-wrapper::before {
         width: 5rem;
-        display: hidden; /* Show left shadow on phone portrait */
     }
     .scroll-shadow-wrapper::after {
         width: 5rem;
-        display: hidden;
     }
-        /* You might not need the desktop-specific left offset anymore if the wrapper handles it */
 }
 
 /* =============================================== */
@@ -509,10 +528,6 @@ body, #main-content-wrapper {
     body {
         /* If you need any specific body changes for phone portrait */
         -webkit-text-size-adjust: 221%;
-    }
-
-    #initial-buffer {
-        size: 0rem;
     }
 
     .container { /* Your main content container class from Tailwind */
@@ -572,7 +587,7 @@ body, #main-content-wrapper {
     #main-layout-container {
         display: flex; /* Ensure display flex is still active if not inherited */
         flex-direction: column !important; /* Stack children vertically */
-        align-items: left;
+        align-items: flex-start; /* was 'left', which is not a valid value */
     }
 
     #main-layout-container > .flex-shrink-0,  /* This targets the ABOUT block wrapper */
@@ -627,10 +642,6 @@ body, #main-content-wrapper {
     p.mb-\[4\.5rem\] {
         margin-bottom: 10rem !important;
     }
-    /* Ensure paragraphs within about-text-container have appropriate styling */
-    #about-text-container p {
-        font-weight: light !important; /* If this was set inline before */
-    }
 
 
     #social-icons-container {
@@ -662,12 +673,11 @@ body, #main-content-wrapper {
         margin-right: 0 !important; /* Reset right margin */
     }
 
-    #films-modules-container .films-section-wrapper {
-        margin-top: 0rem !important; /* Space between individual film modules */
-        margin-bottom: 100rem !important; /* Space below each film module */
-        width: 376rem !important; /* Override desktop width */
-    }
-    
+    /* (Removed a dead '.films-section-wrapper' rule here: no element has that
+       class — the wrappers use ids like #films-section-wrapper-module1. If you
+       want per-module spacing on phones, target
+       [id^="films-section-wrapper-module"] instead.) */
+
     #films-heading-1 { /* The main "FILMS" heading */
         /*font-size: 36rem !important; /* Example: Smaller heading */
         padding-left: 20rem !important; /* Adjust padding if needed */
@@ -692,12 +702,8 @@ body, #main-content-wrapper {
         margin-left: 20rem !important; /* Center the film images */
     }
 
-    #filmsimage-3-module1,
-    #filmsimage-3-module2,
-    #filmsimage-3-module3,
-    #filmsimage-3-module4 {
-        margin-right: 10rem !important; /* Center the film images */
-    }
+    /* (Removed dead '#filmsimage-3-moduleN' rules: the real ids are
+       'films-image-3-moduleN', which already have mr-[12rem] in the HTML.) */
 
 
     /* -------------------------------------------------- */
@@ -711,11 +717,6 @@ body, #main-content-wrapper {
         margin-top: 30rem !important; /* Space above contact section */
     }
 
-    #contact-content-wrapper {
-        flex-direction: row !important;
-
-        /*gap: 17.56rem;*/
-    }
     #contact-heading {
         margin-bottom: 0 !important; /* Reset bottom margin */
         display: none;
@@ -727,7 +728,7 @@ body, #main-content-wrapper {
     }
 
     #contact-text-content {
-        width: 173.88rem !important; 
+        width: 173.88rem !important;
         text-align: left;
         line-height: 1.4 !important;
         margin-left: 0 !important; /* Reset left margin */
@@ -759,10 +760,6 @@ body, #main-content-wrapper {
     body {
         /* If you need any specific body changes for Mixed Touch */
         -webkit-text-size-adjust: 120%;
-    }
-
-    #initial-buffer {
-        size: 0rem;
     }
 
     .container { /* Your main content container class from Tailwind */
@@ -824,7 +821,7 @@ body, #main-content-wrapper {
     #main-layout-container {
         display: flex; /* Ensure display flex is still active if not inherited */
         flex-direction: column !important; /* Stack children vertically */
-        align-items: left;
+        align-items: flex-start; /* was 'left', which is not a valid value */
     }
 
     #main-layout-container > .flex-shrink-0,  /* This targets the ABOUT block wrapper */
@@ -878,10 +875,6 @@ body, #main-content-wrapper {
     p.mb-\[4\.5rem\] {
         margin-bottom: 10rem !important;
     }
-    /* Ensure paragraphs within about-text-container have appropriate styling */
-    #about-text-container p {
-        font-weight: light !important; /* If this was set inline before */
-    }
 
 
     #social-icons-container {
@@ -913,12 +906,9 @@ body, #main-content-wrapper {
         margin-right: 0 !important; /* Reset right margin */
     }
 
-    #films-modules-container .films-section-wrapper {
-        margin-top: 0rem !important; /* Space between individual film modules */
-        margin-bottom: 100rem !important; /* Space below each film module */
-        width: 376rem !important; /* Override desktop width */
-    }
-    
+    /* (Removed a dead '.films-section-wrapper' rule here — see note in the
+       phone-portrait media query.) */
+
     #films-heading-1 { /* The main "FILMS" heading */
         /*font-size: 36rem !important; /* Example: Smaller heading */
         padding-left: 45rem !important; /* Adjust padding if needed */
@@ -937,13 +927,13 @@ body, #main-content-wrapper {
     .scroll-shadow-wrapper {
         margin-bottom: 15rem !important; /* Space between film strips */
     }
+    /* Shadow widths for this mode (shadows stay disabled while the
+       'display: none' lines in the base rules are present). */
     .scroll-shadow-wrapper::before {
         width: 50rem;
-        display: hidden; /* Show left shadow on phone portrait */
     }
     .scroll-shadow-wrapper::after {
         width: 5rem !important;
-        display: hidden;
     }
 
     #films-image-1-module1,
@@ -953,12 +943,8 @@ body, #main-content-wrapper {
         margin-left: 45rem !important; /* Center the film images */
     }
 
-    #filmsimage-3-module1,
-    #filmsimage-3-module2,
-    #filmsimage-3-module3,
-    #filmsimage-3-module4 {
-        margin-right: 30rem !important; /* Center the film images */
-    }
+    /* (Removed dead '#filmsimage-3-moduleN' rules — see note in the
+       phone-portrait media query.) */
     #castCrew1,
     #castCrew2,
     #castCrew3,
@@ -979,9 +965,6 @@ body, #main-content-wrapper {
         margin-top: 0rem !important; /* Space above contact section */
     }
 
-    #contact-content-wrapper {
-        flex-direction: row !important;
-    }
     #contact-heading {
         margin-bottom: 0 !important; /* Reset bottom margin */
         display: none;

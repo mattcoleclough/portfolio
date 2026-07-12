@@ -65,3 +65,7 @@ dist-ssr
 # Private environment variables
 .env.local
 .env.*.local
+
+# macOS
+.DS_Store
+
